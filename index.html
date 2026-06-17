@@ -585,7 +585,7 @@ function dashLoad(){
       ? '👋 Chưa có từ vựng. Hãy vào <b>Thêm từ mới</b> để bắt đầu!'
       : '✅ Bạn có <b>'+total+'</b> từ vựng. Chọn mục bên trái để luyện tập!')+
     '</div>';
-  document.getElementById('dash-spin').style.display='none';
+  var dsp=document.getElementById('dash-spin'); if(dsp) dsp.style.display='none';
 }
 function stat(icon,label,val){ return '<div style="background:#f8f9fa;border-radius:12px;padding:14px;text-align:center"><div style="font-size:24px">'+icon+'</div><div style="font-size:22px;font-weight:bold;color:#1a73e8">'+val+'</div><div style="font-size:12px;color:#888">'+label+'</div></div>'; }
 
@@ -1038,7 +1038,7 @@ function stInit(){
 
 // ── Init: load vocab from GAS, then render dashboard ──
 function loadVocabFromGAS(){
-  document.getElementById('dash-spin').style.display='';
+  var sp=document.getElementById('dash-spin'); if(sp) sp.style.display='';
   fetch(GAS_URL+'?action=vocab')
     .then(function(r){ return r.json(); })
     .then(function(r){
