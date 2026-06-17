@@ -1181,24 +1181,21 @@ function stInit(){
   .initSheets();
 }
 
-// ── Init: load vocab from GAS, then render dashboard ──
+// ── Init: load vocab from GAS via POST (avoids CORS issues with GET) ──
 function loadVocabFromGAS(){
   var sp=document.getElementById('dash-spin'); if(sp) sp.style.display='';
-  fetch(GAS_URL+'?action=vocab')
-    .then(function(r){ return r.json(); })
-    .then(function(r){
-      if(r.success && r.data){
-        ALL_VOCAB = r.data;
-        // populate vocab dropdowns dynamically
-        var prSel = document.getElementById('pr-sel');
-        if(prSel){
-          ALL_VOCAB.forEach(function(w){
-            var o = document.createElement('option');
-            o.value = w.word; o.dataset.ipa = w.ipa||'';
-            o.textContent = w.word + (w.ipa ? ' · ' + w.ipa : '');
-            prSel.appendChild(o);
-          });
-        }
+  callGAS('getVocab')
+    .then(function(vocab){
+      ALL_VOCAB = vocab || [];
+      // populate vocab dropdowns dynamically
+      var prSel = document.getElementById('pr-sel');
+      if(prSel){
+        ALL_VOCAB.forEach(function(w){
+          var o = document.createElement('option');
+          o.value = w.word; o.dataset.ipa = w.ipa||'';
+          o.textContent = w.word + (w.ipa ? ' · ' + w.ipa : '');
+          prSel.appendChild(o);
+        });
       }
       dashLoad();
     })
