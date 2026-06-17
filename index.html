@@ -285,7 +285,6 @@ textarea{resize:vertical}
     <div class="divider">— hoặc chọn từ —</div>
     <select id="pr-sel" onchange="prPick()">
       <option value="">-- Chọn từ --</option>
-      ${vocab.map(w=>'<option value="'+w.word+'" data-ipa="'+(w.ipa||'')+'">'+w.word+(w.ipa?' · '+w.ipa:'')+'</option>').join('')}
     </select>
     <div class="divider">— hoặc nhập tay —</div>
     <input id="pr-custom" type="text" placeholder="e.g. I would like to schedule a meeting" oninput="prSet(this.value,'')">
@@ -1043,7 +1042,18 @@ function loadVocabFromGAS(){
   fetch(GAS_URL+'?action=vocab')
     .then(function(r){ return r.json(); })
     .then(function(r){
-      if(r.success && r.data){ ALL_VOCAB = r.data; }
+      if(r.success && r.data){
+        ALL_VOCAB = r.data;
+        var prSel = document.getElementById('pr-sel');
+        if(prSel){
+          ALL_VOCAB.forEach(function(w){
+            var o = document.createElement('option');
+            o.value = w.word; o.dataset.ipa = w.ipa||'';
+            o.textContent = w.word + (w.ipa ? ' · ' + w.ipa : '');
+            prSel.appendChild(o);
+          });
+        }
+      }
       dashLoad();
     })
     .catch(function(){ dashLoad(); }); // graceful fallback
