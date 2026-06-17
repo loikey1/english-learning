@@ -512,12 +512,12 @@ function callGAS(action) {
 }
 
 // google.script.run compatibility shim — keeps all existing call sites working
-var _gSucc = null, _gFail = null;
+var _gSucc = null, _gFail = null, _gasProxy;
 var _gasHandler = {
-  withSuccessHandler: function(cb){ _gSucc = cb; return _gasHandler; },
-  withFailureHandler: function(cb){ _gFail = cb; return _gasHandler; }
+  withSuccessHandler: function(cb){ _gSucc = cb; return _gasProxy; },
+  withFailureHandler: function(cb){ _gFail = cb; return _gasProxy; }
 };
-var google = {script:{run: new Proxy(_gasHandler, {
+_gasProxy = new Proxy(_gasHandler, {
   get: function(target, prop) {
     if (prop in target) return target[prop];
     var sc = _gSucc, fc = _gFail;
@@ -529,7 +529,8 @@ var google = {script:{run: new Proxy(_gasHandler, {
         .catch(function(e){ if(fc) fc(e); else console.error('GAS:', prop, e); });
     };
   }
-})}};
+});
+var google = {script:{run: _gasProxy}};
 
 let ALL_VOCAB = []; // loaded via callGAS on startup
 let shData = null, rpHistory = [], irData = null;
