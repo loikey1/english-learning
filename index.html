@@ -743,15 +743,18 @@ function mcqShowResult(){
 function grCreate(){
   var topic=document.getElementById('gr-topic').value, count=document.getElementById('gr-count').value;
   spin('gr-spin',true); show('gr-area',false);
-  google.script.run.withSuccessHandler(function(qs){
+  google.script.run.withSuccessHandler(function(res){
     spin('gr-spin',false);
+    var qs=res.questions||res; // res = {title, questions:[...]} or fallback array
+    window._grQs=qs;
+    var header=res.title?'<div style="font-weight:bold;font-size:14px;margin-bottom:12px;color:#1a73e8">'+res.title+'</div>':'';
     var html=qs.map(function(q,i){
       var parts=q.sentence.split('___');
       var hint=q.hint?'<span style="background:#fff3e0;color:#e65100;border-radius:6px;padding:1px 7px;font-size:11px;margin-left:3px">('+q.hint+')</span>':'';
       var sentence=parts.length>1?parts[0]+'<input type="text" id="gri'+i+'" style="border:none;border-bottom:2px solid #1a73e8;width:100px;padding:2px 4px;outline:none;background:transparent">'+hint+(parts[1]||''):q.sentence;
       return '<div style="background:#f8f9fa;border-radius:10px;padding:12px;margin-bottom:10px;border:2px solid #e0e0e0" id="gre'+i+'">'+'<div style="font-size:11px;color:#888;margin-bottom:4px">Câu '+(i+1)+'</div><div style="font-size:14px;line-height:1.8">'+sentence+'</div>'+'<div id="grf'+i+'" style="display:none;margin-top:6px;font-size:12px;color:#555">'+q.explanation+'</div></div>';
     }).join('');
-    document.getElementById('gr-area').innerHTML=html+'<button class="btn btn-green" onclick="grCheck2('+JSON.stringify(qs)+')">✅ Kiểm tra đáp án</button>';
+    document.getElementById('gr-area').innerHTML=header+html+'<button class="btn btn-green" onclick="grCheck2(window._grQs)">✅ Kiểm tra đáp án</button>';
     show('gr-area',true);
   }).withFailureHandler(function(e){ spin('gr-spin',false); alert('Lỗi: '+e.message); })
   .generateGrammarExerciseSPA(topic,parseInt(count));
@@ -848,7 +851,7 @@ function prStartMic(){
   prRec.onerror=function(e){
     prStopMic();
     if(e.error==='not-allowed'){
-      document.getElementById('pr-status').innerHTML='❌ Chưa cấp quyền mic. <a href="chrome://settings/content/microphone" target="_blank" style="color:#1a73e8">Mở Chrome Settings</a> → tìm <b>script.googleusercontent.com</b> → Allow → reload trang.';
+      document.getElementById('pr-status').innerHTML='❌ Chưa cấp quyền mic. Nhấn icon 🔒 trên thanh địa chỉ → <b>Microphone</b> → Allow → reload trang.';
     } else {
       document.getElementById('pr-status').textContent='❌ Mic lỗi: '+e.error;
     }
@@ -899,7 +902,7 @@ function shStartMic(){
   shRec.onerror=function(e){
     shStopMic();
     if(e.error==='not-allowed'){
-      document.getElementById('sh-status').innerHTML='❌ Chưa cấp quyền mic. <a href="chrome://settings/content/microphone" target="_blank" style="color:#1a73e8">Mở Chrome Settings</a> → tìm <b>script.googleusercontent.com</b> → Allow → reload trang.';
+      document.getElementById('sh-status').innerHTML='❌ Chưa cấp quyền mic. Nhấn icon 🔒 trên thanh địa chỉ → <b>Microphone</b> → Allow → reload trang.';
     } else {
       document.getElementById('sh-status').textContent='❌ Mic lỗi: '+e.error;
     }
@@ -1044,6 +1047,7 @@ function loadVocabFromGAS(){
     .then(function(r){
       if(r.success && r.data){
         ALL_VOCAB = r.data;
+        // populate vocab dropdowns dynamically
         var prSel = document.getElementById('pr-sel');
         if(prSel){
           ALL_VOCAB.forEach(function(w){
