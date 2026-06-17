@@ -57,12 +57,9 @@ textarea{resize:vertical}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 .status-txt{text-align:center;font-size:13px;color:#888;min-height:20px;margin:6px 0}
 /* ── Flashcard ── */
-.scene{perspective:1000px;width:100%;height:200px;cursor:pointer;margin:14px 0}
-.fc-card{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:.55s ease}
-.fc-card.flip{transform:rotateY(180deg)}
-.fc-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:16px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px}
-.fc-front{background:linear-gradient(135deg,#1a73e8,#0d47a1);color:white}
-.fc-back{background:linear-gradient(135deg,#34a853,#1b5e20);color:white;transform:rotateY(180deg)}
+.fc-main{background:linear-gradient(135deg,#1a73e8,#0d47a1);border-radius:16px;padding:28px 20px 20px;color:white;text-align:center;cursor:pointer;user-select:none;margin:10px 0 0}
+.fc-reveal{background:#f1f8e9;border:2px solid #34a853;border-top:none;border-radius:0 0 16px 16px;padding:16px 20px;text-align:center;display:none}
+.fc-reveal.open{display:block}
 .fc-word{font-size:28px;font-weight:bold;margin:6px 0;text-align:center}
 .fc-sub{font-size:12px;opacity:.75}
 .fc-meaning{font-size:22px;font-weight:bold;margin:6px 0}
@@ -107,7 +104,8 @@ textarea{resize:vertical}
   <div class="sb-item active" onclick="nav('dashboard',this)">📊 Dashboard</div>
   <div class="sb-section">Từ vựng</div>
   <div class="sb-item" onclick="nav('vocab-add',this)">➕ Thêm từ mới</div>
-  <div class="sb-item" onclick="nav('vocab-import',this)">📋 Import hàng loạt</div>
+  <div class="sb-item" onclick="nav('vocab-import',this)">📥 Import hàng loạt</div>
+  <div class="sb-item" onclick="nav('vocab-list',this)">📋 Danh sách từ vựng</div>
   <div class="sb-item" onclick="nav('flashcard',this)">🃏 Flashcard</div>
   <div class="sb-item" onclick="nav('quiz-mcq',this)">🧠 Quiz trắc nghiệm</div>
   <div class="sb-section">Luyện tập</div>
@@ -185,21 +183,43 @@ textarea{resize:vertical}
   </div>
 </div>
 
+<!-- ── VOCAB LIST ── -->
+<div class="view" id="v-vocab-list">
+  <div class="page-title">📋 Danh sách từ vựng</div>
+  <div class="card">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+      <input id="vl-search" type="text" placeholder="🔍 Tìm từ, nghĩa, IPA..." oninput="vlFilter()" style="flex:1">
+      <span id="vl-count" style="font-size:12px;color:#888;white-space:nowrap"></span>
+    </div>
+    <div id="vl-table" style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="background:#f8f9fa;color:#555;font-size:11px;text-transform:uppercase;letter-spacing:.5px">
+            <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #e0e0e0">Từ</th>
+            <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #e0e0e0">Loại từ</th>
+            <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #e0e0e0">IPA</th>
+            <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #e0e0e0">Nghĩa</th>
+            <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #e0e0e0">Ví dụ</th>
+          </tr>
+        </thead>
+        <tbody id="vl-body"></tbody>
+      </table>
+    </div>
+    <div id="vl-empty" style="display:none;text-align:center;padding:30px;color:#888">Chưa có từ vựng nào</div>
+  </div>
+</div>
+
 <!-- ── FLASHCARD ── -->
 <div class="view" id="v-flashcard">
   <div class="page-title">🃏 Flashcard</div>
   <div class="card">
-    <div style="font-size:12px;color:#888;text-align:center;margin-bottom:8px">Click card để lật xem nghĩa</div>
-    <div class="scene" onclick="document.getElementById('fc').classList.toggle('flip')">
-      <div class="fc-card" id="fc">
-        <div class="fc-face fc-front" id="fc-front"></div>
-        <div class="fc-face fc-back"  id="fc-back"></div>
-      </div>
-    </div>
-    <div style="text-align:center;font-size:13px;color:#888;margin:4px 0" id="fc-ctr"></div>
+    <div onclick="fcToggle()" id="fc-main" class="fc-main"></div>
+    <div id="fc-reveal" class="fc-reveal"></div>
+    <div style="text-align:center;font-size:11px;color:#aaa;margin:6px 0 10px" id="fc-hint">👆 Nhấn card để xem nghĩa</div>
+    <div style="text-align:center;font-size:13px;color:#888;margin-bottom:8px" id="fc-ctr"></div>
     <div class="btn-row" style="justify-content:center">
       <button class="btn btn-gray" onclick="fcGo(-1)">← Trước</button>
-      <button class="btn btn-gray" onclick="fcShuffle()" title="Trộn ngẫu nhiên">🔀</button>
+      <button class="btn btn-gray" onclick="fcShuffle()" title="Trộn ngẫu nhiên">🔀 Trộn</button>
       <button class="btn btn-primary" onclick="fcGo(1)">Tiếp →</button>
     </div>
   </div>
@@ -378,17 +398,17 @@ textarea{resize:vertical}
       <div><label>Tình huống</label>
         <select id="rp-scene"><option value="job interview">Phỏng vấn xin việc</option><option value="ordering at a restaurant">Gọi món nhà hàng</option><option value="hotel check-in">Check-in khách sạn</option><option value="doctor appointment">Khám bệnh</option><option value="business meeting">Họp kinh doanh</option><option value="asking for directions">Hỏi đường</option><option value="shopping">Mua sắm</option><option value="making a complaint">Khiếu nại</option></select></div>
       <div><label>Vai của bạn</label>
-        <select id="rp-role"><option value="customer">Khách hàng</option><option value="employee">Nhân viên</option><option value="interviewer">Người phỏng vấn</option><option value="interviewee">Người được phỏng vấn</option></select></div>
+        <select id="rp-role"><option value="customer">Khách hàng</option><option value="employee">Nhân viên</option><option value="interviewer">Người phỏng vấn</option><option value="interviewee">Ứng viên</option><option value="patient">Bệnh nhân</option><option value="tourist">Du khách</option></select></div>
     </div>
-    <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="rpStart()">🎬 Bắt đầu</button>
+    <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="rpGenScript()">📜 Tạo đoạn hội thoại</button>
     <div class="spin" id="rp-spin"></div>
-    <div id="rp-chat" style="display:none;margin-top:12px">
-      <div id="rp-msgs" style="max-height:300px;overflow-y:auto;border:1px solid #eee;border-radius:10px;padding:12px;margin-bottom:10px;background:#f8f9fa"></div>
-      <div style="display:flex;gap:8px">
-        <input id="rp-input" type="text" placeholder="Nhập câu trả lời của bạn..." onkeypress="if(event.key==='Enter')rpReply()">
-        <button class="btn btn-primary" onclick="rpReply()">Gửi →</button>
-      </div>
-      <div class="spin" id="rp-reply-spin"></div>
+    <!-- Script view -->
+    <div id="rp-script-area" style="display:none;margin-top:14px">
+      <div style="font-size:12px;color:#888;margin-bottom:10px;text-align:center">Nhấn 🎙️ ở câu của bạn để ghi âm, rồi nhấn <b>Đánh giá</b></div>
+      <div id="rp-script-lines"></div>
+      <button class="btn btn-green btn-full" style="margin-top:12px" onclick="rpEvaluate()">📊 Đánh giá tất cả câu của tôi</button>
+      <div class="spin" id="rp-eval-spin"></div>
+      <div class="result-box result-green" id="rp-eval-result" style="margin-top:8px"></div>
     </div>
   </div>
 </div>
@@ -433,8 +453,12 @@ textarea{resize:vertical}
     <div class="spin" id="is-spin"></div>
     <div id="is-area" style="display:none;margin-top:12px">
       <div class="card result-blue" id="is-q" style="display:block;font-size:15px;font-weight:bold"></div>
-      <label style="margin-top:10px">Câu trả lời của bạn</label>
-      <textarea id="is-ans" rows="5" placeholder="Viết câu trả lời của bạn..."></textarea>
+      <div style="margin-top:12px;text-align:center">
+        <button class="mic-btn" id="is-mic" onclick="isToggleMic()" title="Nhấn để ghi âm câu trả lời">🎙️</button>
+        <div class="status-txt" id="is-mic-status">Nhấn mic để nói, hoặc gõ bên dưới</div>
+      </div>
+      <label style="margin-top:8px">Câu trả lời của bạn</label>
+      <textarea id="is-ans" rows="4" placeholder="Ghi âm hoặc gõ câu trả lời..."></textarea>
       <button class="btn btn-purple btn-full" style="margin-top:8px" onclick="isEval()">📊 Đánh giá</button>
       <div class="spin" id="is-eval-spin"></div>
       <div class="result-box result-green" id="is-result"></div>
@@ -543,6 +567,7 @@ function nav(id, el){
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   if(el) el.classList.add('active');
   if(id==='dashboard') dashLoad();
+  if(id==='vocab-list') vlRender();
   if(id==='flashcard') fcInit();
   if(id==='quiz-mcq') mcqStart();
 }
@@ -672,14 +697,61 @@ function fcInit(){
 }
 function fcShuffle(){ for(var i=fcWords.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=fcWords[i]; fcWords[i]=fcWords[j]; fcWords[j]=t; } fcIdx=0; fcRender(); }
 function fcGo(d){ fcIdx=(fcIdx+d+fcWords.length)%fcWords.length; fcRender(); }
+function fcToggle(){
+  var rev=document.getElementById('fc-reveal');
+  rev.classList.toggle('open');
+  document.getElementById('fc-hint').textContent=rev.classList.contains('open')?'👆 Nhấn lại để ẩn':'👆 Nhấn card để xem nghĩa';
+}
 function fcRender(){
-  if(!fcWords.length){ document.getElementById('fc-front').innerHTML='<div style="color:white;font-size:16px">Chưa có từ vựng!</div>'; return; }
+  if(!fcWords.length){ document.getElementById('fc-main').innerHTML='<div style="font-size:15px;opacity:.7">Chưa có từ vựng!</div>'; return; }
   var w=fcWords[fcIdx];
-  document.getElementById('fc').classList.remove('flip');
-  document.getElementById('fc-front').innerHTML='<span class="fc-sub">'+(w.pos||'')+'</span><div class="fc-word">'+w.word+'</div><span class="fc-sub">'+(w.ipa||'')+'</span><div style="display:flex;gap:8px;margin-top:12px"><button onclick="event.stopPropagation();tts(\''+w.word.replace(/'/g,"\\'")+'\',.9)" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:white;border-radius:16px;padding:4px 12px;cursor:pointer;font-size:12px">🔊 Nghe</button><button onclick="event.stopPropagation();tts(\''+w.word.replace(/'/g,"\\'")+'\',.6)" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:white;border-radius:16px;padding:4px 12px;cursor:pointer;font-size:12px">🐢 Chậm</button></div>';
-  document.getElementById('fc-back').innerHTML='<div class="fc-meaning">'+(w.meaning||'')+'</div><div class="fc-ex">'+(w.example||'')+'</div>';
+  // Close reveal panel instantly (no animation)
+  document.getElementById('fc-reveal').classList.remove('open');
+  document.getElementById('fc-hint').textContent='👆 Nhấn card để xem nghĩa';
+  var safe=w.word.replace(/'/g,"\\'");
+  document.getElementById('fc-main').innerHTML=
+    '<div style="font-size:12px;opacity:.7;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">'+(w.pos||'')+'</div>'+
+    '<div class="fc-word">'+w.word+'</div>'+
+    (w.ipa?'<div style="font-size:14px;opacity:.8;margin:4px 0">'+w.ipa+'</div>':'')+
+    '<div style="display:flex;gap:8px;justify-content:center;margin-top:14px">'+
+    '<button onclick="event.stopPropagation();tts(\''+safe+'\',.9)" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:white;border-radius:16px;padding:5px 14px;cursor:pointer;font-size:12px">🔊 Nghe</button>'+
+    '<button onclick="event.stopPropagation();tts(\''+safe+'\',.6)" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:white;border-radius:16px;padding:5px 14px;cursor:pointer;font-size:12px">🐢 Chậm</button>'+
+    '</div>';
+  document.getElementById('fc-reveal').innerHTML=
+    '<div style="font-size:20px;font-weight:bold;color:#2e7d32;margin-bottom:6px">'+(w.meaning||'')+'</div>'+
+    (w.example?'<div style="font-size:12px;color:#555;font-style:italic">'+w.example+'</div>':'');
   document.getElementById('fc-ctr').textContent=(fcIdx+1)+' / '+fcWords.length;
 }
+
+// ─────────────── VOCAB LIST ───────────────
+function vlRender(){
+  document.getElementById('vl-search').value='';
+  vlFilter();
+}
+function vlFilter(){
+  var q=(document.getElementById('vl-search').value||'').toLowerCase().trim();
+  var words=q?ALL_VOCAB.filter(function(w){
+    return (w.word||'').toLowerCase().includes(q)||(w.meaning||'').toLowerCase().includes(q)||(w.ipa||'').toLowerCase().includes(q);
+  }):ALL_VOCAB;
+  document.getElementById('vl-count').textContent=words.length+' từ';
+  if(!words.length){
+    document.getElementById('vl-body').innerHTML='';
+    document.getElementById('vl-empty').style.display='block';
+    return;
+  }
+  document.getElementById('vl-empty').style.display='none';
+  document.getElementById('vl-body').innerHTML=words.map(function(w,i){
+    var bg=i%2===0?'#fff':'#f8f9fa';
+    return '<tr style="background:'+bg+';border-bottom:1px solid #f0f0f0">'+
+      '<td style="padding:9px 10px;font-weight:bold;color:#1a73e8;white-space:nowrap">'+escHtml(w.word||'')+'</td>'+
+      '<td style="padding:9px 10px;color:#888;font-size:11px;white-space:nowrap">'+escHtml(w.pos||'')+'</td>'+
+      '<td style="padding:9px 10px;color:#555;font-size:12px;white-space:nowrap">'+escHtml(w.ipa||'')+'</td>'+
+      '<td style="padding:9px 10px;color:#333">'+escHtml(w.meaning||'')+'</td>'+
+      '<td style="padding:9px 10px;color:#666;font-style:italic;font-size:12px">'+escHtml(w.example||'')+'</td>'+
+    '</tr>';
+  }).join('');
+}
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ─────────────── MCQ QUIZ ───────────────
 var mcqQs=[], mcqIdx=0, mcqSc=0, mcqWr=0, MCQ_TOTAL=10;
@@ -912,29 +984,99 @@ function shStartMic(){
 }
 function shStopMic(){ if(shRec) shRec.stop(); shIsRec=false; document.getElementById('sh-mic').classList.remove('rec'); document.getElementById('sh-mic').textContent='🎙️'; }
 
-// ─────────────── ROLE PLAY ───────────────
-function rpStart(){
+// ─────────────── ROLE PLAY (Script + Record) ───────────────
+var rpScript=[], rpRecordings={}, rpLineRec=null, rpLineRecIdx=-1;
+
+function rpGenScript(){
   var scene=document.getElementById('rp-scene').value, role=document.getElementById('rp-role').value;
-  rpHistory=[]; spin('rp-spin',true); show('rp-chat',false);
-  google.script.run.withSuccessHandler(function(msg){
-    spin('rp-spin',false); show('rp-chat',true);
-    rpHistory=[{role:'assistant',content:msg}];
-    rpRenderChat();
-  }).withFailureHandler(function(e){ spin('rp-spin',false); alert('Lỗi: '+e.message); })
-  .startRolePlay(scene,role);
+  rpScript=[]; rpRecordings={}; show('rp-script-area',false); spin('rp-spin',true);
+  google.script.run.withSuccessHandler(function(data){
+    spin('rp-spin',false);
+    rpScript=data.exchanges||[];
+    rpRenderScript();
+    show('rp-script-area',true);
+    show('rp-eval-result',false);
+  }).withFailureHandler(function(e){ spin('rp-spin',false); alert('❌ '+e.message); })
+  .generateRolePlayScript(scene,role);
 }
-function rpReply(){
-  var txt=document.getElementById('rp-input').value.trim(); if(!txt) return;
-  rpHistory.push({role:'user',content:txt}); document.getElementById('rp-input').value='';
-  rpRenderChat(); spin('rp-reply-spin',true);
-  google.script.run.withSuccessHandler(function(reply){ spin('rp-reply-spin',false); rpHistory.push({role:'assistant',content:reply}); rpRenderChat(); })
-  .withFailureHandler(function(e){ spin('rp-reply-spin',false); alert('Lỗi: '+e.message); })
-  .continueRolePlay(rpHistory);
+
+function rpRenderScript(){
+  var lines=document.getElementById('rp-script-lines');
+  lines.innerHTML=rpScript.map(function(ex,i){
+    var isUser=ex.speaker==='user';
+    var recorded=rpRecordings[i]?'<div style="font-size:11px;color:#1b5e20;margin-top:4px">✅ Đã ghi: <i>'+rpRecordings[i]+'</i></div>':'';
+    if(isUser){
+      return '<div id="rp-line-'+i+'" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;flex-direction:row-reverse">'+
+        '<div style="flex:1;background:#e8f0fe;border-radius:12px 12px 0 12px;padding:10px 14px">'+
+          '<div style="font-size:10px;color:#1a73e8;font-weight:bold;margin-bottom:4px;text-transform:uppercase">Bạn (gợi ý)</div>'+
+          '<div style="font-size:13px;color:#555;font-style:italic;line-height:1.6">'+ex.text+'</div>'+
+          recorded+
+        '</div>'+
+        '<button id="rp-mic-'+i+'" onclick="rpRecordLine('+i+')" style="margin-top:2px;flex-shrink:0;width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;font-size:16px;background:'+(rpRecordings[i]?'#34a853':'#1a73e8')+';color:white">'+
+          (rpRecordings[i]?'🔄':'🎙️')+
+        '</button>'+
+      '</div>';
+    } else {
+      return '<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px">'+
+        '<div style="width:32px;height:32px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🤖</div>'+
+        '<div style="flex:1;background:#f8f9fa;border-radius:12px 12px 12px 0;padding:10px 14px">'+
+          '<div style="font-size:10px;color:#888;font-weight:bold;margin-bottom:4px;text-transform:uppercase">'+ex.speaker+'</div>'+
+          '<div style="font-size:13px;color:#333;line-height:1.6">'+ex.text+'</div>'+
+          '<button onclick="tts(\''+ex.text.replace(/'/g,"\\'")+'\',.9)" style="background:none;border:1px solid #ddd;border-radius:10px;padding:2px 8px;cursor:pointer;font-size:11px;color:#888;margin-top:6px">🔊 Nghe</button>'+
+        '</div>'+
+      '</div>';
+    }
+  }).join('');
 }
-function rpRenderChat(){
-  var msgs=document.getElementById('rp-msgs');
-  msgs.innerHTML=rpHistory.map(function(m){ return '<div style="margin-bottom:8px;'+(m.role==='user'?'text-align:right':'')+'"><div style="display:inline-block;padding:8px 12px;border-radius:12px;max-width:85%;font-size:13px;line-height:1.6;'+(m.role==='user'?'background:#1a73e8;color:white':'background:#f0f0f0;color:#333')+'">'+(m.role==='assistant'?'🤖 ':'')+m.content.replace(/\n/g,'<br>')+'</div></div>'; }).join('');
-  msgs.scrollTop=msgs.scrollHeight;
+
+function rpRecordLine(idx){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ alert('Cần dùng Chrome!'); return; }
+  // Stop previous if running
+  if(rpLineRec){ try{ rpLineRec.stop(); }catch(e){} }
+  rpLineRecIdx=idx;
+  var btn=document.getElementById('rp-mic-'+idx);
+  rpLineRec=new SR(); rpLineRec.lang='en-US'; rpLineRec.interimResults=false;
+  rpLineRec.onstart=function(){ btn.style.background='#ea4335'; btn.textContent='⏹️'; };
+  rpLineRec.onresult=function(e){
+    rpRecordings[idx]=e.results[0][0].transcript.trim();
+    rpRenderScript(); // re-render to show recording + update button
+  };
+  rpLineRec.onerror=function(e){ btn.style.background='#1a73e8'; btn.textContent='🎙️'; if(e.error==='not-allowed') alert('Chưa cấp quyền mic. Nhấn 🔒 → Microphone → Allow.'); };
+  rpLineRec.onend=function(){ btn.style.background=rpRecordings[idx]?'#34a853':'#1a73e8'; btn.textContent=rpRecordings[idx]?'🔄':'🎙️'; };
+  rpLineRec.start();
+}
+
+function rpEvaluate(){
+  var pairs=rpScript.filter(function(ex){ return ex.speaker==='user'; }).map(function(ex,i){
+    var globalIdx=rpScript.indexOf(ex); // find real index
+    return {expected:ex.text, said:rpRecordings[globalIdx]||''};
+  }).filter(function(p){ return p.said; });
+  if(!pairs.length){ alert('Chưa ghi âm câu nào!'); return; }
+  spin('rp-eval-spin',true); show('rp-eval-result',false);
+  var summary='Evaluate this role-play recording.\n\nExchanges:\n'+pairs.map(function(p,i){ return (i+1)+'. Expected: "'+p.expected+'"\n   Said: "'+p.said+'"'; }).join('\n')+'\n\nFor each line: score pronunciation/fluency 1-10, note errors, give tips. Then overall band. Reply in Vietnamese.';
+  google.script.run.withSuccessHandler(function(r){ spin('rp-eval-spin',false); showResult('rp-eval-result',r,'green'); })
+  .withFailureHandler(function(e){ spin('rp-eval-spin',false); alert('❌ '+e.message); })
+  .evaluateShadowing(summary, JSON.stringify(pairs)); // reuse evaluateShadowing for general eval
+}
+
+// ─────────────── IELTS SPEAKING MIC ───────────────
+var isRec=null, isIsRec=false;
+function isToggleMic(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ alert('Cần dùng Chrome!'); return; }
+  if(isIsRec){ isRec.stop(); return; }
+  isRec=new SR(); isRec.lang='en-US'; isRec.interimResults=false; isRec.maxAlternatives=1;
+  isRec.onstart=function(){ isIsRec=true; document.getElementById('is-mic').classList.add('rec'); document.getElementById('is-mic').textContent='⏹️'; document.getElementById('is-mic-status').textContent='🔴 Đang nghe... (nói xong nhấn ⏹️)'; };
+  isRec.onresult=function(e){
+    var t=e.results[0][0].transcript;
+    var cur=document.getElementById('is-ans').value.trim();
+    document.getElementById('is-ans').value=cur?(cur+' '+t):t;
+    document.getElementById('is-mic-status').textContent='✅ Đã thêm vào bên dưới';
+  };
+  isRec.onerror=function(e){ document.getElementById('is-mic-status').textContent=e.error==='not-allowed'?'❌ Nhấn 🔒 → Microphone → Allow → reload':'❌ Lỗi: '+e.error; };
+  isRec.onend=function(){ isIsRec=false; document.getElementById('is-mic').classList.remove('rec'); document.getElementById('is-mic').textContent='🎙️'; };
+  isRec.start();
 }
 
 // ─────────────── NATURAL SPEAKING ───────────────
