@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🇬🇧 English Learning</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Google Sans',Arial,sans-serif;background:#f0f2f5;display:flex;height:100vh;overflow:hidden}
+/* ── Sidebar ── */
+#sidebar{width:220px;background:#1a1f36;color:white;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+.sb-logo{padding:20px 16px 12px;font-size:17px;font-weight:bold;border-bottom:1px solid rgba(255,255,255,.1)}
+.sb-section{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4);padding:14px 16px 4px}
+.sb-item{padding:9px 16px 9px 20px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.75);border-radius:0;transition:.15s;display:flex;align-items:center;gap:8px}
+.sb-item:hover{background:rgba(255,255,255,.08);color:white}
+.sb-item.active{background:rgba(26,115,232,.35);color:white;border-right:3px solid #1a73e8}
+/* ── Main ── */
+#main{flex:1;overflow-y:auto;padding:24px}
+.view{display:none}.view.active{display:block}
+.page-title{font-size:22px;font-weight:bold;color:#1a1f36;margin-bottom:18px}
+/* ── Cards ── */
+.card{background:white;border-radius:14px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.06);margin-bottom:16px}
+/* ── Forms ── */
+label{font-size:12px;font-weight:bold;color:#555;display:block;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit}
+textarea{resize:vertical}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.divider{text-align:center;color:#aaa;font-size:12px;margin:10px 0}
+/* ── Buttons ── */
+.btn{padding:10px 16px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:bold;font-family:inherit;transition:.15s}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:#1a73e8;color:white}
+.btn-primary:hover:not(:disabled){background:#1557b0}
+.btn-purple{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white}
+.btn-green{background:#34a853;color:white}
+.btn-red{background:#ea4335;color:white}
+.btn-gray{background:#e8eaed;color:#333}
+.btn-full{width:100%}
+.btn-row{display:flex;gap:8px;margin-top:12px}
+/* ── Spinner ── */
+.spin{display:none;text-align:center;color:#888;padding:10px;font-size:13px}
+/* ── Result boxes ── */
+.result-box{border-radius:10px;padding:14px;font-size:13px;line-height:1.8;white-space:pre-wrap;display:none;margin-top:10px}
+.result-green{background:#f1f8e9;border-left:4px solid #34a853}
+.result-blue{background:#e8f0fe;border-left:4px solid #1a73e8}
+.result-yellow{background:#fff8e1;border-left:4px solid #fbbc04}
+.result-red{background:#fce8e6;border-left:4px solid #ea4335}
+/* ── Target display ── */
+.target-box{background:linear-gradient(135deg,#1a73e8,#0d47a1);border-radius:14px;padding:22px;text-align:center;color:white;display:none;margin:12px 0}
+.target-word{font-size:30px;font-weight:bold;margin:8px 0}
+.target-ipa{font-size:14px;opacity:.8}
+.speak-row{display:flex;gap:8px;justify-content:center;margin-top:12px}
+.speak-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:white;border-radius:20px;padding:5px 14px;cursor:pointer;font-size:12px}
+/* ── Mic ── */
+.mic-btn{width:72px;height:72px;border-radius:50%;border:none;cursor:pointer;font-size:28px;display:block;margin:14px auto;background:#1a73e8;color:white;box-shadow:0 4px 14px rgba(26,115,232,.4)}
+.mic-btn.rec{background:#ea4335;animation:pulse 1s infinite}
+.mic-btn:disabled{background:#ccc;box-shadow:none;cursor:not-allowed}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.status-txt{text-align:center;font-size:13px;color:#888;min-height:20px;margin:6px 0}
+/* ── Flashcard ── */
+.scene{perspective:1000px;width:100%;height:200px;cursor:pointer;margin:14px 0}
+.fc-card{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:.55s ease}
+.fc-card.flip{transform:rotateY(180deg)}
+.fc-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:16px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px}
+.fc-front{background:linear-gradient(135deg,#1a73e8,#0d47a1);color:white}
+.fc-back{background:linear-gradient(135deg,#34a853,#1b5e20);color:white;transform:rotateY(180deg)}
+.fc-word{font-size:28px;font-weight:bold;margin:6px 0;text-align:center}
+.fc-sub{font-size:12px;opacity:.75}
+.fc-meaning{font-size:22px;font-weight:bold;margin:6px 0}
+.fc-ex{font-size:11px;font-style:italic;opacity:.85;text-align:center;margin-top:6px}
+/* ── MCQ ── */
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.opt-btn{padding:13px;border:2px solid #e0e0e0;border-radius:12px;cursor:pointer;font-size:14px;text-align:center;background:white;font-family:inherit;transition:.2s}
+.opt-btn:hover:not(:disabled){border-color:#1a73e8;background:#e8f0fe}
+.opt-btn.correct{border-color:#34a853;background:#e8f5e9;color:#1b5e20;font-weight:bold}
+.opt-btn.wrong{border-color:#ea4335;background:#fce8e6}
+.opt-btn.reveal{border-color:#34a853;background:#e8f5e9;opacity:.7}
+.opt-btn:disabled{cursor:default}
+/* ── Shadowing steps ── */
+.steps{display:flex;gap:6px;margin-bottom:14px}
+.step{flex:1;text-align:center;padding:7px 4px;border-radius:8px;font-size:11px;font-weight:bold;background:#f0f0f0;color:#888;cursor:pointer}
+.step.active{background:#1a73e8;color:white}
+.step.done{background:#34a853;color:white}
+.chunk span{background:#e8f0fe;border-radius:4px;padding:1px 4px;margin:0 1px;cursor:pointer}
+.chunk span:hover{background:#1a73e8;color:white}
+.chunk span.stress{font-weight:bold;color:#1a73e8}
+/* ── Progress bar ── */
+.pbar-wrap{background:#e8f0fe;border-radius:99px;height:8px;margin:8px 0}
+.pbar{background:linear-gradient(90deg,#1a73e8,#7c3aed);height:8px;border-radius:99px;transition:width .3s}
+/* ── Score ── */
+.score-big{font-size:52px;font-weight:bold;color:#1a73e8;text-align:center}
+/* ── Hint ── */
+.hint-toggle{background:none;border:1px dashed #fbbc04;color:#e65100;border-radius:8px;padding:3px 10px;font-size:12px;cursor:pointer}
+.hint-reveal{display:none;font-size:13px;color:#e65100;background:#fff8e1;border-radius:6px;padding:4px 10px;margin-top:6px}
+/* ── Badge ── */
+.badge{display:inline-block;background:#ede9fe;color:#6d28d9;border-radius:10px;font-size:11px;padding:2px 8px;font-weight:bold}
+/* ── Word card (import preview) ── */
+.word-card{background:#f8f9fa;border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;align-items:flex-start;border-left:4px solid #1a73e8}
+.word-card.error{border-left-color:#ea4335;opacity:.7}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ SIDEBAR ═══════════════════════════════ -->
+<nav id="sidebar">
+  <div class="sb-logo">🇬🇧 English Learning</div>
+  <div class="sb-section">Tổng quan</div>
+  <div class="sb-item active" onclick="nav('dashboard',this)">📊 Dashboard</div>
+  <div class="sb-section">Từ vựng</div>
+  <div class="sb-item" onclick="nav('vocab-add',this)">➕ Thêm từ mới</div>
+  <div class="sb-item" onclick="nav('vocab-import',this)">📋 Import hàng loạt</div>
+  <div class="sb-item" onclick="nav('flashcard',this)">🃏 Flashcard</div>
+  <div class="sb-item" onclick="nav('quiz-mcq',this)">🧠 Quiz trắc nghiệm</div>
+  <div class="sb-section">Luyện tập</div>
+  <div class="sb-item" onclick="nav('grammar',this)">✍️ Ngữ pháp</div>
+  <div class="sb-item" onclick="nav('reading',this)">📖 Đọc hiểu</div>
+  <div class="sb-item" onclick="nav('writing',this)">✏️ Viết</div>
+  <div class="sb-section">Phát âm & Nói</div>
+  <div class="sb-item" onclick="nav('pronunciation',this)">🎤 Luyện phát âm</div>
+  <div class="sb-item" onclick="nav('shadowing',this)">🔄 Shadowing</div>
+  <div class="sb-item" onclick="nav('roleplay',this)">🎭 Role-play</div>
+  <div class="sb-item" onclick="nav('natural',this)">🗯️ Nói tự nhiên hơn</div>
+  <div class="sb-section">IELTS</div>
+  <div class="sb-item" onclick="nav('ielts-writing',this)">✍️ Writing Checker</div>
+  <div class="sb-item" onclick="nav('ielts-speaking',this)">🗣️ Speaking Practice</div>
+  <div class="sb-item" onclick="nav('ielts-reading',this)">📖 Reading T/F/NG</div>
+  <div class="sb-item" onclick="nav('ielts-vocab',this)">📚 Vocab theo chủ đề</div>
+  <div class="sb-section">Cài đặt</div>
+  <div class="sb-item" onclick="nav('settings',this)">⚙️ API Key</div>
+</nav>
+
+<!-- ═══════════════════════════════ MAIN ═══════════════════════════════ -->
+<div id="main">
+
+<!-- ── DASHBOARD ── -->
+<div class="view active" id="v-dashboard">
+  <div class="page-title">📊 Dashboard</div>
+  <div id="dash-stats" class="card"><div class="spin" id="dash-spin" style="display:block">⏳ Đang tải...</div></div>
+</div>
+
+<!-- ── VOCAB ADD ── -->
+<div class="view" id="v-vocab-add">
+  <div class="page-title">➕ Thêm từ mới</div>
+  <div class="card">
+    <label>Từ / cụm từ tiếng Anh</label>
+    <div style="display:flex;gap:8px">
+      <input id="va-word" type="text" placeholder="e.g. resilience" style="flex:1">
+      <button class="btn btn-purple" onclick="vaLookup()">🔍 Tra AI</button>
+    </div>
+    <div class="spin" id="va-spin">⏳ Đang tra...</div>
+    <div id="va-form" style="display:none">
+      <div class="row"><div><label>Nghĩa (VI)</label><input id="va-meaning"></div><div><label>Loại từ</label><select id="va-pos"><option>noun</option><option>verb</option><option>adjective</option><option>adverb</option><option>phrase</option><option>idiom</option></select></div></div>
+      <label>IPA</label><input id="va-ipa">
+      <label>Ví dụ</label><input id="va-ex">
+      <label>Tags</label><input id="va-tags" placeholder="IELTS, business...">
+      <div class="btn-row">
+        <button class="btn btn-primary btn-full" onclick="vaSave()">💾 Lưu vào Vocabulary</button>
+      </div>
+    </div>
+    <div class="result-box result-green" id="va-result"></div>
+  </div>
+</div>
+
+<!-- ── VOCAB IMPORT ── -->
+<div class="view" id="v-vocab-import">
+  <div class="page-title">📋 Import từ hàng loạt</div>
+  <div class="card">
+    <label>Danh sách từ (mỗi dòng 1 từ, hoặc cách nhau dấu phẩy)</label>
+    <textarea id="vi-list" rows="7" placeholder="perseverance&#10;resilience&#10;eloquent&#10;&#10;Hoặc: perseverance, resilience, eloquent&#10;&#10;Hoặc kèm nghĩa: perseverance - sự kiên trì"></textarea>
+    <div class="row" style="margin-top:8px">
+      <div><label>Tags</label><input id="vi-tags" placeholder="IELTS, unit5..."></div>
+      <div><label>Chế độ</label><select id="vi-mode"><option value="full">Đầy đủ</option><option value="quick">Nhanh</option></select></div>
+    </div>
+    <button class="btn btn-purple btn-full" style="margin-top:10px" onclick="viLookup()">✨ Tra từ với AI</button>
+    <div class="spin" id="vi-spin"></div>
+    <div id="vi-progress" style="display:none;font-size:12px;color:#1a73e8;padding:6px 0"></div>
+    <div id="vi-preview" style="display:none;margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span id="vi-count" style="font-size:13px;font-weight:bold"></span>
+        <span style="font-size:12px;color:#1a73e8;cursor:pointer" onclick="viToggleAll()">Chọn/bỏ tất cả</span>
+      </div>
+      <div id="vi-cards"></div>
+      <button class="btn btn-green btn-full" style="margin-top:10px" onclick="viSave()">💾 Thêm từ đã chọn</button>
+    </div>
+    <div class="result-box result-green" id="vi-result"></div>
+  </div>
+</div>
+
+<!-- ── FLASHCARD ── -->
+<div class="view" id="v-flashcard">
+  <div class="page-title">🃏 Flashcard</div>
+  <div class="card">
+    <div style="font-size:12px;color:#888;text-align:center;margin-bottom:8px">Click card để lật xem nghĩa</div>
+    <div class="scene" onclick="document.getElementById('fc').classList.toggle('flip')">
+      <div class="fc-card" id="fc">
+        <div class="fc-face fc-front" id="fc-front"></div>
+        <div class="fc-face fc-back"  id="fc-back"></div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:13px;color:#888;margin:4px 0" id="fc-ctr"></div>
+    <div class="btn-row" style="justify-content:center">
+      <button class="btn btn-gray" onclick="fcGo(-1)">← Trước</button>
+      <button class="btn btn-gray" onclick="fcShuffle()" title="Trộn ngẫu nhiên">🔀</button>
+      <button class="btn btn-primary" onclick="fcGo(1)">Tiếp →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── QUIZ MCQ ── -->
+<div class="view" id="v-quiz-mcq">
+  <div class="page-title">🧠 Quiz Trắc nghiệm</div>
+  <div class="card" id="mcq-screen">
+    <div class="pbar-wrap"><div class="pbar" id="mcq-pbar" style="width:0%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:10px">
+      <span id="mcq-num">Câu 1/10</span><span>✅ <span id="mcq-sc">0</span> ❌ <span id="mcq-wr">0</span></span>
+    </div>
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:8px" id="mcq-type"></div>
+    <div id="mcq-body"></div>
+    <div class="opts-grid" id="mcq-opts"></div>
+    <div class="result-box" id="mcq-fb" style="margin-top:0"></div>
+    <button class="btn btn-primary btn-full" id="mcq-next" onclick="mcqNext()" style="display:none;margin-top:10px">Câu tiếp →</button>
+  </div>
+  <div class="card" id="mcq-result" style="display:none;text-align:center;padding:30px">
+    <div class="score-big" id="mcq-rscore"></div>
+    <div id="mcq-rgrade" style="font-size:18px;margin:8px 0"></div>
+    <div id="mcq-rstats" style="font-size:13px;color:#888"></div>
+    <button class="btn btn-primary" style="margin-top:16px" onclick="mcqStart()">🔄 Chơi lại</button>
+  </div>
+</div>
+
+<!-- ── GRAMMAR ── -->
+<div class="view" id="v-grammar">
+  <div class="page-title">✍️ Ngữ pháp</div>
+  <div class="card">
+    <div class="row">
+      <div><label>Thì / cấu trúc</label>
+        <select id="gr-topic"><option value="present simple">Present Simple</option><option value="present continuous">Present Continuous</option><option value="past simple">Past Simple</option><option value="past continuous">Past Continuous</option><option value="present perfect">Present Perfect</option><option value="future will/going to">Future (will/going to)</option><option value="conditionals type 1 and 2">Conditionals 1 & 2</option><option value="passive voice">Passive Voice</option><option value="reported speech">Reported Speech</option><option value="modal verbs">Modal Verbs</option></select></div>
+      <div><label>Số câu</label>
+        <select id="gr-count"><option value="5">5 câu</option><option value="8" selected>8 câu</option><option value="10">10 câu</option></select></div>
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="grCreate()">📝 Tạo bài tập</button>
+    <div class="spin" id="gr-spin"></div>
+    <div id="gr-area" style="display:none;margin-top:14px"></div>
+  </div>
+  <div class="card">
+    <div style="font-weight:bold;margin-bottom:8px">✅ Kiểm tra câu của tôi</div>
+    <textarea id="gr-check" rows="3" placeholder="Nhập câu cần kiểm tra..."></textarea>
+    <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="grCheck()">🔍 Kiểm tra</button>
+    <div class="spin" id="gr-check-spin"></div>
+    <div class="result-box result-green" id="gr-check-result"></div>
+  </div>
+</div>
+
+<!-- ── READING ── -->
+<div class="view" id="v-reading">
+  <div class="page-title">📖 Đọc hiểu</div>
+  <div class="card">
+    <label>Paste đoạn văn cần phân tích</label>
+    <textarea id="rd-text" rows="8" placeholder="Paste bất kỳ đoạn văn tiếng Anh nào..."></textarea>
+    <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="rdAnalyze()">🔍 Phân tích</button>
+    <div class="spin" id="rd-spin"></div>
+    <div class="result-box result-blue" id="rd-result"></div>
+  </div>
+</div>
+
+<!-- ── WRITING ── -->
+<div class="view" id="v-writing">
+  <div class="page-title">✏️ Cải thiện bài viết</div>
+  <div class="card">
+    <label>Bài viết của bạn</label>
+    <textarea id="wr-text" rows="8" placeholder="Nhập đoạn văn tiếng Anh..."></textarea>
+    <div class="row" style="margin-top:8px">
+      <div><label>Mục tiêu</label><select id="wr-goal"><option value="general">Viết chung</option><option value="IELTS Task 2">IELTS Task 2</option><option value="IELTS Task 1">IELTS Task 1</option><option value="email">Email chuyên nghiệp</option></select></div>
+      <div style="display:flex;align-items:flex-end"><button class="btn btn-primary btn-full" onclick="wrImprove()">✨ Cải thiện</button></div>
+    </div>
+    <div class="spin" id="wr-spin"></div>
+    <div class="result-box result-green" id="wr-result"></div>
+  </div>
+</div>
+
+<!-- ── PRONUNCIATION ── -->
+<div class="view" id="v-pronunciation">
+  <div class="page-title">🎤 Luyện phát âm</div>
+  <div class="card">
+    <button class="btn btn-purple btn-full" id="pr-gen" onclick="prGenerate()">🎲 AI tạo câu từ vocab của bạn</button>
+    <div class="divider">— hoặc chọn từ —</div>
+    <select id="pr-sel" onchange="prPick()">
+      <option value="">-- Chọn từ --</option>
+      ${vocab.map(w=>'<option value="'+w.word+'" data-ipa="'+(w.ipa||'')+'">'+w.word+(w.ipa?' · '+w.ipa:'')+'</option>').join('')}
+    </select>
+    <div class="divider">— hoặc nhập tay —</div>
+    <input id="pr-custom" type="text" placeholder="e.g. I would like to schedule a meeting" oninput="prSet(this.value,'')">
+    <div class="target-box" id="pr-tbox">
+      <div style="font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:1px">Đọc to:</div>
+      <div class="target-word" id="pr-tword"></div>
+      <div class="target-ipa" id="pr-tipa"></div>
+      <div class="speak-row">
+        <button class="speak-btn" onclick="tts(prTarget,1)">🔊 Nghe</button>
+        <button class="speak-btn" onclick="tts(prTarget,0.6)">🐢 Chậm</button>
+      </div>
+    </div>
+    <div class="spin" id="pr-gen-spin"></div>
+    <button class="btn btn-primary btn-full" id="pr-guide-btn" onclick="prGetGuide()" disabled style="margin-top:8px">🔍 Xem hướng dẫn phát âm (AI)</button>
+    <div class="spin" id="pr-guide-spin"></div>
+    <div class="result-box result-blue" id="pr-guide"></div>
+    <div id="pr-mic-area" style="display:none;margin-top:12px">
+      <div style="font-weight:bold;font-size:13px;text-align:center;margin-bottom:8px">🎙️ Nhấn mic và đọc to:</div>
+      <button class="mic-btn" id="pr-mic" onclick="prToggleMic()" disabled>🎙️</button>
+      <div class="status-txt" id="pr-status">Chọn/nhập từ trước</div>
+      <div class="result-box result-yellow" id="pr-heard" style="margin-top:8px"></div>
+      <div class="spin" id="pr-spin"></div>
+      <div class="result-box result-green" id="pr-result"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SHADOWING ── -->
+<div class="view" id="v-shadowing">
+  <div class="page-title">🔄 Shadowing Practice</div>
+  <div class="card">
+    <div class="row">
+      <div><label>Chủ đề</label>
+        <select id="sh-topic"><option value="daily life and routines">Cuộc sống hàng ngày</option><option value="work and career">Công việc</option><option value="technology opinions">Công nghệ</option><option value="travel experiences">Du lịch</option><option value="food and culture">Ẩm thực</option><option value="personal goals">Mục tiêu cá nhân</option></select></div>
+      <div><label>Phong cách</label>
+        <select id="sh-style"><option value="slow and clear, with simple vocabulary">Chậm & đơn giản</option><option value="natural conversational pace" selected>Tự nhiên</option><option value="fast native-like with contractions">Native speed</option></select></div>
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="shGenerate()">🎯 Tạo đoạn luyện</button>
+    <div class="spin" id="sh-spin"></div>
+    <div id="sh-main" style="display:none;margin-top:14px">
+      <div class="steps">
+        <div class="step active" id="sh-s1" onclick="shStep(1)">1️⃣ Đọc hiểu</div>
+        <div class="step" id="sh-s2" onclick="shStep(2)">2️⃣ Cách đọc</div>
+        <div class="step" id="sh-s3" onclick="shStep(3)">3️⃣ Shadowing</div>
+      </div>
+      <div id="sh-step1">
+        <div class="card" style="border-left:4px solid #1a73e8">
+          <div class="chunk" id="sh-chunks"></div>
+          <div style="font-size:12px;color:#888;font-style:italic;margin-top:8px" id="sh-vi"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-gray" onclick="ttsPassage(1)">🔊 Nghe</button>
+          <button class="btn btn-gray" onclick="ttsPassage(0.6)">🐢 Chậm</button>
+          <button class="btn btn-primary" onclick="shStep(2)">Tiếp →</button>
+        </div>
+      </div>
+      <div id="sh-step2" style="display:none">
+        <div class="card" style="border-left:4px solid #fbbc04;white-space:pre-wrap;font-size:13px;line-height:1.8" id="sh-guide"></div>
+        <div class="btn-row">
+          <button class="btn btn-gray" onclick="shStep(1)">← Quay lại</button>
+          <button class="btn btn-primary" onclick="shStep(3)">Shadowing →</button>
+        </div>
+      </div>
+      <div id="sh-step3" style="display:none">
+        <div class="card" style="border-left:4px solid #1a73e8">
+          <div class="chunk" id="sh-chunks3"></div>
+        </div>
+        <div class="btn-row" style="margin-bottom:8px">
+          <button class="btn btn-gray" onclick="ttsPassage(1)">🔊 Nghe mẫu</button>
+          <button class="btn btn-gray" onclick="ttsPassage(0.65)">🐢 Nghe chậm</button>
+        </div>
+        <button class="mic-btn" id="sh-mic" onclick="shToggleMic()">🎙️</button>
+        <div class="status-txt" id="sh-status">Nhấn mic rồi đọc theo đoạn trên</div>
+        <div class="result-box result-yellow" id="sh-heard"></div>
+        <div class="spin" id="sh-eval-spin"></div>
+        <div class="result-box result-green" id="sh-eval"></div>
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn btn-gray" onclick="shStep(2)">← Guide</button>
+          <button class="btn btn-primary" onclick="shGenerate()">🔄 Đoạn mới</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ROLE PLAY ── -->
+<div class="view" id="v-roleplay">
+  <div class="page-title">🎭 Role-play hội thoại</div>
+  <div class="card">
+    <div class="row">
+      <div><label>Tình huống</label>
+        <select id="rp-scene"><option value="job interview">Phỏng vấn xin việc</option><option value="ordering at a restaurant">Gọi món nhà hàng</option><option value="hotel check-in">Check-in khách sạn</option><option value="doctor appointment">Khám bệnh</option><option value="business meeting">Họp kinh doanh</option><option value="asking for directions">Hỏi đường</option><option value="shopping">Mua sắm</option><option value="making a complaint">Khiếu nại</option></select></div>
+      <div><label>Vai của bạn</label>
+        <select id="rp-role"><option value="customer">Khách hàng</option><option value="employee">Nhân viên</option><option value="interviewer">Người phỏng vấn</option><option value="interviewee">Người được phỏng vấn</option></select></div>
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="rpStart()">🎬 Bắt đầu</button>
+    <div class="spin" id="rp-spin"></div>
+    <div id="rp-chat" style="display:none;margin-top:12px">
+      <div id="rp-msgs" style="max-height:300px;overflow-y:auto;border:1px solid #eee;border-radius:10px;padding:12px;margin-bottom:10px;background:#f8f9fa"></div>
+      <div style="display:flex;gap:8px">
+        <input id="rp-input" type="text" placeholder="Nhập câu trả lời của bạn..." onkeypress="if(event.key==='Enter')rpReply()">
+        <button class="btn btn-primary" onclick="rpReply()">Gửi →</button>
+      </div>
+      <div class="spin" id="rp-reply-spin"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── NATURAL SPEAKING ── -->
+<div class="view" id="v-natural">
+  <div class="page-title">🗯️ Nói tự nhiên hơn</div>
+  <div class="card">
+    <label>Câu tiếng Việt bạn muốn nói bằng tiếng Anh</label>
+    <textarea id="ns-text" rows="3" placeholder="e.g. Tôi muốn hỏi về vấn đề này một chút..."></textarea>
+    <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="nsConvert()">✨ Chuyển sang tiếng Anh tự nhiên</button>
+    <div class="spin" id="ns-spin"></div>
+    <div class="result-box result-green" id="ns-result"></div>
+  </div>
+</div>
+
+<!-- ── IELTS WRITING ── -->
+<div class="view" id="v-ielts-writing">
+  <div class="page-title">✍️ IELTS Writing Checker</div>
+  <div class="card">
+    <div class="row">
+      <div><label>Task</label><select id="iw-task"><option value="Task 2">Task 2 (Essay)</option><option value="Task 1">Task 1 (Report)</option></select></div>
+      <div><label>Đề bài (tuỳ chọn)</label><input id="iw-prompt" placeholder="Paste đề bài..."></div>
+    </div>
+    <label style="margin-top:10px">Bài viết của bạn</label>
+    <textarea id="iw-text" rows="10" placeholder="Paste bài viết vào đây..."></textarea>
+    <button class="btn btn-purple btn-full" style="margin-top:8px" onclick="iwCheck()">📊 Chấm điểm IELTS</button>
+    <div class="spin" id="iw-spin"></div>
+    <div class="result-box result-blue" id="iw-result"></div>
+  </div>
+</div>
+
+<!-- ── IELTS SPEAKING ── -->
+<div class="view" id="v-ielts-speaking">
+  <div class="page-title">🗣️ IELTS Speaking Practice</div>
+  <div class="card">
+    <div class="row">
+      <div><label>Part</label><select id="is-part"><option value="Part 1">Part 1 (Intro)</option><option value="Part 2">Part 2 (Long turn)</option><option value="Part 3">Part 3 (Discussion)</option></select></div>
+      <div><label>Chủ đề</label><select id="is-topic"><option>Technology</option><option>Education</option><option>Environment</option><option>Work & Career</option><option>Travel</option><option>Health</option><option>Culture</option></select></div>
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="isGetQ()">🎯 Lấy câu hỏi</button>
+    <div class="spin" id="is-spin"></div>
+    <div id="is-area" style="display:none;margin-top:12px">
+      <div class="card result-blue" id="is-q" style="display:block;font-size:15px;font-weight:bold"></div>
+      <label style="margin-top:10px">Câu trả lời của bạn</label>
+      <textarea id="is-ans" rows="5" placeholder="Viết câu trả lời của bạn..."></textarea>
+      <button class="btn btn-purple btn-full" style="margin-top:8px" onclick="isEval()">📊 Đánh giá</button>
+      <div class="spin" id="is-eval-spin"></div>
+      <div class="result-box result-green" id="is-result"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── IELTS READING ── -->
+<div class="view" id="v-ielts-reading">
+  <div class="page-title">📖 IELTS Reading T/F/NG</div>
+  <div class="card">
+    <label>Chủ đề đoạn văn</label>
+    <input id="ir-topic" placeholder="e.g. renewable energy, climate change, AI...">
+    <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="irGenerate()">📖 Tạo bài đọc</button>
+    <div class="spin" id="ir-spin"></div>
+    <div id="ir-area" style="display:none;margin-top:12px"></div>
+  </div>
+</div>
+
+<!-- ── IELTS VOCAB ── -->
+<div class="view" id="v-ielts-vocab">
+  <div class="page-title">📚 Vocab theo chủ đề IELTS</div>
+  <div class="card">
+    <label>Chủ đề</label>
+    <select id="iv-topic"><option value="environment and climate change">Environment & Climate Change</option><option value="technology and AI">Technology & AI</option><option value="education systems">Education</option><option value="health and medicine">Health & Medicine</option><option value="globalization and culture">Globalization & Culture</option><option value="urbanization and city life">Urbanization</option><option value="economy and business">Economy & Business</option><option value="crime and justice">Crime & Justice</option><option value="media and communication">Media & Communication</option><option value="transport and infrastructure">Transport</option></select>
+    <button class="btn btn-purple btn-full" style="margin-top:8px" onclick="ivGenerate()">✨ Tạo danh sách từ</button>
+    <div class="spin" id="iv-spin"></div>
+    <div id="iv-preview" style="display:none;margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span id="iv-count" style="font-size:13px;font-weight:bold"></span>
+        <button class="btn btn-green" onclick="ivSaveAll()">💾 Thêm tất cả vào Vocab</button>
+      </div>
+      <div id="iv-list"></div>
+    </div>
+    <div class="result-box result-green" id="iv-result"></div>
+  </div>
+</div>
+
+<!-- ── SETTINGS ── -->
+<div class="view" id="v-settings">
+  <div class="page-title">⚙️ Cài đặt</div>
+  <div class="card">
+    <label>Groq API Key</label>
+    <div style="display:flex;gap:8px">
+      <input id="st-key" type="password" placeholder="gsk_...">
+      <button class="btn btn-primary" onclick="stSave()">💾 Lưu</button>
+    </div>
+    <div style="font-size:12px;color:#888;margin-top:6px">Lấy key miễn phí tại <a href="https://console.groq.com" target="_blank">console.groq.com</a> (không cần thẻ tín dụng)</div>
+    <div class="result-box result-green" id="st-result" style="margin-top:8px"></div>
+    <div style="margin-top:16px">
+      <button class="btn btn-gray" onclick="stInit()">🔄 Khởi tạo Sheets (lần đầu)</button>
+    </div>
+    <div class="result-box result-green" id="st-init-result"></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- ═══════════════════════════════ SCRIPTS ═══════════════════════════════ -->
+<script>
+// ─── GitHub Pages: paste your GAS /exec URL below ─────────────────────────
+const GAS_URL = 'YOUR_GAS_WEB_APP_URL_HERE';
+
+// callGAS(action, arg1, arg2, ...) → Promise<result>
+function callGAS(action) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  return fetch(GAS_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify({action: action, args: args})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(r){ if(!r.success) throw new Error(r.error); return r.data; });
+}
+
+// google.script.run compatibility shim — keeps all existing call sites working
+var _gSucc = null, _gFail = null;
+var _gasHandler = {
+  withSuccessHandler: function(cb){ _gSucc = cb; return _gasHandler; },
+  withFailureHandler: function(cb){ _gFail = cb; return _gasHandler; }
+};
+var google = {script:{run: new Proxy(_gasHandler, {
+  get: function(target, prop) {
+    if (prop in target) return target[prop];
+    var sc = _gSucc, fc = _gFail;
+    _gSucc = null; _gFail = null;
+    return function() {
+      var callArgs = [prop].concat(Array.prototype.slice.call(arguments));
+      callGAS.apply(null, callArgs)
+        .then(function(r){ if(sc) sc(r); })
+        .catch(function(e){ if(fc) fc(e); else console.error('GAS:', prop, e); });
+    };
+  }
+})}};
+
+let ALL_VOCAB = []; // loaded via callGAS on startup
+let shData = null, rpHistory = [], irData = null;
+let prTarget = '', prRec = null, prIsRec = false;
+let shRec = null, shIsRec = false;
+
+// ── Navigation ──
+function nav(id, el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('v-'+id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(id==='dashboard') dashLoad();
+  if(id==='flashcard') fcInit();
+  if(id==='quiz-mcq') mcqStart();
+}
+
+// ── TTS helper ──
+function tts(text, rate){
+  speechSynthesis.cancel();
+  if(!text) return;
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang='en-US'; u.rate=rate||0.9;
+  var voices=speechSynthesis.getVoices();
+  var eng=voices.find(v=>v.lang==='en-US'&&v.localService)||voices.find(v=>v.lang.startsWith('en'));
+  if(eng) u.voice=eng;
+  speechSynthesis.speak(u);
+}
+function ttsPassage(rate){ if(shData) tts(shData.text, rate); }
+
+// ── Spin helper ──
+function spin(id,on){ document.getElementById(id).style.display=on?'block':'none'; }
+function show(id,vis){ document.getElementById(id).style.display=vis===false?'none':'block'; }
+function showResult(id,text,type){
+  var el=document.getElementById(id);
+  el.innerText=text; el.className='result-box result-'+(type||'green'); el.style.display='block';
+}
+
+// ─────────────── DASHBOARD ───────────────
+function dashLoad(){
+  // ALL_VOCAB already injected at page load — compute stats instantly, no server call needed
+  var total = ALL_VOCAB.length;
+  var today = new Date(); today.setHours(0,0,0,0);
+  // Words added today: use index as proxy if no date field, or just show total
+  document.getElementById('dash-stats').innerHTML =
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+
+    stat('📚','Tổng từ vựng', total)+
+    stat('🃏','Sẵn sàng Flashcard', total)+
+    stat('🎯','Quiz MCQ', total >= 4 ? '✅ Sẵn sàng' : '⚠️ Cần ≥4 từ')+
+    '</div>'+
+    '<div style="margin-top:14px;background:#e8f0fe;border-radius:10px;padding:12px;font-size:13px;color:#1a1f36">'+
+    (total===0
+      ? '👋 Chưa có từ vựng. Hãy vào <b>Thêm từ mới</b> để bắt đầu!'
+      : '✅ Bạn có <b>'+total+'</b> từ vựng. Chọn mục bên trái để luyện tập!')+
+    '</div>';
+  document.getElementById('dash-spin').style.display='none';
+}
+function stat(icon,label,val){ return '<div style="background:#f8f9fa;border-radius:12px;padding:14px;text-align:center"><div style="font-size:24px">'+icon+'</div><div style="font-size:22px;font-weight:bold;color:#1a73e8">'+val+'</div><div style="font-size:12px;color:#888">'+label+'</div></div>'; }
+
+// ─────────────── VOCAB ADD ───────────────
+function vaLookup(){
+  var w=document.getElementById('va-word').value.trim();
+  if(!w) return;
+  show('va-form',false); spin('va-spin',true);
+  google.script.run.withSuccessHandler(function(d){
+    spin('va-spin',false);
+    document.getElementById('va-meaning').value=d.meaning||'';
+    document.getElementById('va-pos').value=d.pos||'noun';
+    document.getElementById('va-ipa').value=d.ipa||'';
+    document.getElementById('va-ex').value=d.example||'';
+    show('va-form',true);
+  }).withFailureHandler(function(e){ spin('va-spin',false); alert('Lỗi: '+e.message); })
+  .getWordInfo(w);
+}
+function vaSave(){
+  var data={word:document.getElementById('va-word').value.trim(),meaning:document.getElementById('va-meaning').value,pos:document.getElementById('va-pos').value,example:document.getElementById('va-ex').value,ipa:document.getElementById('va-ipa').value,tags:document.getElementById('va-tags').value};
+  if(!data.word||!data.meaning){ alert('Nhập từ và nghĩa!'); return; }
+  google.script.run.withSuccessHandler(function(){
+    showResult('va-result','✅ Đã lưu "'+data.word+'" vào Vocabulary!','green');
+    document.getElementById('va-word').value=''; show('va-form',false);
+    // update in-memory vocab so flashcard/quiz/dashboard reflect new word immediately
+    ALL_VOCAB.push({word:data.word,meaning:data.meaning,pos:data.pos,example:data.example,ipa:data.ipa||''});
+  })
+  .withFailureHandler(function(e){ showResult('va-result','❌ '+e.message,'red'); })
+  .saveVocab(data);
+}
+
+// ─────────────── VOCAB IMPORT ───────────────
+var viResults=[], viAllChecked=true;
+function viLookup(){
+  var raw=document.getElementById('vi-list').value.trim();
+  if(!raw){ alert('Nhập danh sách từ!'); return; }
+  var parsed=raw.split(/[\n,]+/).map(l=>l.trim()).filter(l=>l).map(l=>{
+    var d=l.indexOf(' - ');
+    return d>0?{word:l.slice(0,d).trim(),hint:l.slice(d+3).trim()}:{word:l,hint:''};
+  });
+  if(parsed.length>50){ alert('Tối đa 50 từ!'); return; }
+  var tags=document.getElementById('vi-tags').value.trim();
+  var mode=document.getElementById('vi-mode').value;
+  viResults=[];
+  show('vi-preview',false); spin('vi-spin',true);
+  var batches=[]; for(var i=0;i<parsed.length;i+=10) batches.push(parsed.slice(i,i+10));
+  var bi=0;
+  function nextBatch(){
+    if(bi>=batches.length){ spin('vi-spin',false); show('vi-progress',false); viRender(tags); return; }
+    document.getElementById('vi-progress').style.display='block';
+    document.getElementById('vi-progress').textContent='⏳ Đang tra '+(bi*10+1)+'-'+Math.min((bi+1)*10,parsed.length)+'/'+parsed.length+' từ...';
+    google.script.run.withSuccessHandler(function(b){ viResults=viResults.concat(b); bi++; nextBatch(); })
+    .withFailureHandler(function(e){ spin('vi-spin',false); show('vi-progress',false); alert('Lỗi: '+e.message); })
+    .lookupWordBatch(batches[bi],mode);
+  }
+  nextBatch();
+}
+function viRender(tags){
+  document.getElementById('vi-count').textContent=viResults.length+' từ đã tra:';
+  document.getElementById('vi-cards').innerHTML=viResults.map(function(w,i){
+    return '<div class="word-card'+(w.error?' error':'')+'"><input type="checkbox" id="vic'+i+'" '+(w.error?'':'checked')+'><div style="margin-left:8px"><b style="color:#1a73e8">'+w.word+'</b> <span style="color:#888;font-style:italic;font-size:12px">'+( w.pos||'')+'</span>'+(w.ipa?' · <span style="font-size:12px;color:#555">'+w.ipa+'</span>':'')+'<div style="font-size:13px;margin:2px 0">'+(w.error?'⚠️ '+w.error:'📌 '+w.meaning)+'</div>'+(w.example?'<div style="font-size:11px;color:#666;font-style:italic">'+w.example+'</div>':'')+(tags?'<span class="badge">'+tags+'</span>':'')+'</div></div>';
+  }).join('');
+  show('vi-preview',true);
+}
+function viToggleAll(){ viAllChecked=!viAllChecked; viResults.forEach(function(_,i){ var c=document.getElementById('vic'+i); if(c) c.checked=viAllChecked; }); }
+function viSave(){
+  var tags=document.getElementById('vi-tags').value.trim();
+  var sel=viResults.filter(function(w,i){ var c=document.getElementById('vic'+i); return c&&c.checked&&!w.error; }).map(function(w){ return Object.assign({},w,{tags:tags||w.tags||''}); });
+  if(!sel.length){ alert('Chọn ít nhất 1 từ!'); return; }
+  google.script.run.withSuccessHandler(function(r){
+    var msg='✅ Đã thêm '+r.added+' từ!';
+    if(r.skipped&&r.skipped.length) msg+='\n⚠️ Bỏ qua '+r.skipped.length+' từ đã có: '+r.skipped.join(', ');
+    showResult('vi-result',msg,'green'); show('vi-preview',false);
+    // update in-memory vocab
+    sel.forEach(function(w){ if(!r.skipped||r.skipped.indexOf(w.word)<0) ALL_VOCAB.push({word:w.word,meaning:w.meaning,pos:w.pos||'',example:w.example||'',ipa:w.ipa||''}); });
+  }).withFailureHandler(function(e){ showResult('vi-result','❌ '+e.message,'red'); })
+  .bulkAddVocab(sel);
+}
+
+// ─────────────── FLASHCARD ───────────────
+var fcWords=[], fcIdx=0;
+function fcInit(){
+  fcWords=[...ALL_VOCAB]; fcIdx=0; fcShuffle(); fcRender();
+}
+function fcShuffle(){ for(var i=fcWords.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=fcWords[i]; fcWords[i]=fcWords[j]; fcWords[j]=t; } fcIdx=0; fcRender(); }
+function fcGo(d){ fcIdx=(fcIdx+d+fcWords.length)%fcWords.length; fcRender(); }
+function fcRender(){
+  if(!fcWords.length){ document.getElementById('fc-front').innerHTML='<div style="color:white;font-size:16px">Chưa có từ vựng!</div>'; return; }
+  var w=fcWords[fcIdx];
+  document.getElementById('fc').classList.remove('flip');
+  document.getElementById('fc-front').innerHTML='<span class="fc-sub">'+(w.pos||'')+'</span><div class="fc-word">'+w.word+'</div><span class="fc-sub">'+(w.ipa||'')+'</span><div style="display:flex;gap:8px;margin-top:12px"><button onclick="event.stopPropagation();tts(\''+w.word.replace(/'/g,"\\'")+'\',.9)" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:white;border-radius:16px;padding:4px 12px;cursor:pointer;font-size:12px">🔊 Nghe</button><button onclick="event.stopPropagation();tts(\''+w.word.replace(/'/g,"\\'")+'\',.6)" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:white;border-radius:16px;padding:4px 12px;cursor:pointer;font-size:12px">🐢 Chậm</button></div>';
+  document.getElementById('fc-back').innerHTML='<div class="fc-meaning">'+(w.meaning||'')+'</div><div class="fc-ex">'+(w.example||'')+'</div>';
+  document.getElementById('fc-ctr').textContent=(fcIdx+1)+' / '+fcWords.length;
+}
+
+// ─────────────── MCQ QUIZ ───────────────
+var mcqQs=[], mcqIdx=0, mcqSc=0, mcqWr=0, MCQ_TOTAL=10;
+function mcqStart(){
+  if(ALL_VOCAB.length<4){ document.getElementById('mcq-screen').innerHTML='<div style="color:#888;text-align:center;padding:20px">Cần ít nhất 4 từ để chơi quiz!</div>'; return; }
+  var pool=[...ALL_VOCAB].sort(()=>Math.random()-.5).slice(0,Math.min(MCQ_TOTAL,ALL_VOCAB.length));
+  mcqQs=pool.map(function(w){
+    var others=ALL_VOCAB.filter(x=>x.word!==w.word).sort(()=>Math.random()-.5).slice(0,3);
+    var canFill=w.example&&w.example.length>5;
+    var type=canFill&&Math.random()>.45?'fill':'meaning';
+    if(type==='meaning') return {type,word:w.word,ipa:w.ipa,pos:w.pos,answer:w.meaning,opts:shuffle4([w.meaning,...others.map(x=>x.meaning)])};
+    var sent=w.example.replace(new RegExp(w.word,'gi'),'___');
+    return {type,sentence:sent,answer:w.word,meaning:w.meaning,opts:shuffle4([w.word,...others.map(x=>x.word)])};
+  });
+  mcqIdx=0; mcqSc=0; mcqWr=0;
+  document.getElementById('mcq-result').style.display='none';
+  document.getElementById('mcq-screen').style.display='block';
+  mcqRender();
+}
+function shuffle4(a){ var b=[...a]; for(var i=b.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=b[i];b[i]=b[j];b[j]=t; } return b; }
+function mcqRender(){
+  var q=mcqQs[mcqIdx];
+  document.getElementById('mcq-pbar').style.width=(mcqIdx/MCQ_TOTAL*100)+'%';
+  document.getElementById('mcq-num').textContent='Câu '+(mcqIdx+1)+'/'+MCQ_TOTAL;
+  document.getElementById('mcq-sc').textContent=mcqSc; document.getElementById('mcq-wr').textContent=mcqWr;
+  show('mcq-fb',false); document.getElementById('mcq-next').style.display='none';
+  if(q.type==='meaning'){
+    document.getElementById('mcq-type').textContent='📖 Từ này nghĩa là gì?';
+    document.getElementById('mcq-body').innerHTML='<div style="background:#f8f9fa;border-radius:12px;padding:18px;text-align:center"><div style="font-size:11px;color:#888;font-style:italic">'+(q.pos||'')+'</div><div style="font-size:28px;font-weight:bold;color:#1a73e8;margin:6px 0">'+q.word+'</div><div style="font-size:13px;color:#888">'+( q.ipa||'')+'</div></div>';
+  } else {
+    document.getElementById('mcq-type').textContent='✏️ Chọn từ phù hợp vào chỗ trống';
+    document.getElementById('mcq-body').innerHTML='<div style="background:#f8f9fa;border-radius:12px;padding:16px"><button class="hint-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'block\'?\'none\':\'block\'">💡 Gợi ý</button><div class="hint-reveal">📌 '+q.meaning+'</div><div style="font-size:15px;margin-top:8px;line-height:1.8">'+q.sentence.replace('___','<span style="border-bottom:2px solid #1a73e8;min-width:80px;display:inline-block;text-align:center;color:#1a73e8">___</span>')+'</div></div>';
+  }
+  document.getElementById('mcq-opts').innerHTML=q.opts.map(function(o,i){
+    return '<button class="opt-btn" id="mopt'+i+'" onclick="mcqChoose(this,\''+o.replace(/'/g,"\\'")+'\')" >'+o+'</button>';
+  }).join('');
+}
+function mcqChoose(btn,val){
+  var q=mcqQs[mcqIdx], ok=val===q.answer;
+  if(ok) mcqSc++; else mcqWr++;
+  document.getElementById('mcq-sc').textContent=mcqSc; document.getElementById('mcq-wr').textContent=mcqWr;
+  document.querySelectorAll('.opt-btn').forEach(function(b){ b.disabled=true; if(b.textContent.trim()===q.answer) b.classList.add(b===btn?'correct':'reveal'); });
+  if(!ok) btn.classList.add('wrong');
+  var fb=document.getElementById('mcq-fb');
+  fb.innerText=ok?'✅ Chính xác!':'❌ Đáp án đúng: '+q.answer;
+  fb.className='result-box result-'+(ok?'green':'red'); fb.style.display='block';
+  document.getElementById('mcq-next').style.display='block';
+  document.getElementById('mcq-next').textContent=mcqIdx+1<MCQ_TOTAL?'Câu tiếp theo →':'🏁 Xem kết quả';
+}
+function mcqNext(){ mcqIdx++; if(mcqIdx>=MCQ_TOTAL) mcqShowResult(); else mcqRender(); }
+function mcqShowResult(){
+  document.getElementById('mcq-screen').style.display='none';
+  document.getElementById('mcq-result').style.display='block';
+  var pct=Math.round(mcqSc/MCQ_TOTAL*100);
+  document.getElementById('mcq-rscore').textContent=mcqSc+'/'+MCQ_TOTAL;
+  document.getElementById('mcq-rgrade').textContent=pct>=90?'🏆 Xuất sắc!':pct>=70?'👏 Tốt lắm!':pct>=50?'💪 Cố lên!':'📚 Cần ôn thêm';
+  document.getElementById('mcq-rstats').textContent='Đúng: '+mcqSc+' · Sai: '+mcqWr+' · '+pct+'%';
+}
+
+// ─────────────── GRAMMAR ───────────────
+function grCreate(){
+  var topic=document.getElementById('gr-topic').value, count=document.getElementById('gr-count').value;
+  spin('gr-spin',true); show('gr-area',false);
+  google.script.run.withSuccessHandler(function(qs){
+    spin('gr-spin',false);
+    var html=qs.map(function(q,i){
+      var parts=q.sentence.split('___');
+      var hint=q.hint?'<span style="background:#fff3e0;color:#e65100;border-radius:6px;padding:1px 7px;font-size:11px;margin-left:3px">('+q.hint+')</span>':'';
+      var sentence=parts.length>1?parts[0]+'<input type="text" id="gri'+i+'" style="border:none;border-bottom:2px solid #1a73e8;width:100px;padding:2px 4px;outline:none;background:transparent">'+hint+(parts[1]||''):q.sentence;
+      return '<div style="background:#f8f9fa;border-radius:10px;padding:12px;margin-bottom:10px;border:2px solid #e0e0e0" id="gre'+i+'">'+'<div style="font-size:11px;color:#888;margin-bottom:4px">Câu '+(i+1)+'</div><div style="font-size:14px;line-height:1.8">'+sentence+'</div>'+'<div id="grf'+i+'" style="display:none;margin-top:6px;font-size:12px;color:#555">'+q.explanation+'</div></div>';
+    }).join('');
+    document.getElementById('gr-area').innerHTML=html+'<button class="btn btn-green" onclick="grCheck2('+JSON.stringify(qs)+')">✅ Kiểm tra đáp án</button>';
+    show('gr-area',true);
+  }).withFailureHandler(function(e){ spin('gr-spin',false); alert('Lỗi: '+e.message); })
+  .generateGrammarExerciseSPA(topic,parseInt(count));
+}
+function grCheck2(qs){
+  qs.forEach(function(q,i){
+    var inp=document.getElementById('gri'+i); if(!inp) return;
+    var ans=inp.value.trim().toLowerCase().replace(/[^a-z0-9 ']/g,'');
+    var accepted=q.answer.split('/').map(function(a){ return a.trim().toLowerCase().replace(/[^a-z0-9 ']/g,''); });
+    var ok=accepted.some(function(a){ return ans===a; });
+    var el=document.getElementById('gre'+i);
+    el.style.borderColor=ok?'#34a853':'#ea4335'; el.style.background=ok?'#f1f8e9':'#fce8e6';
+    inp.disabled=true;
+    document.getElementById('grf'+i).style.display='block';
+  });
+}
+function grCheck(){
+  var text=document.getElementById('gr-check').value.trim(); if(!text) return;
+  spin('gr-check-spin',true); show('gr-check-result',false);
+  google.script.run.withSuccessHandler(function(r){ spin('gr-check-spin',false); showResult('gr-check-result',r,'green'); })
+  .withFailureHandler(function(e){ spin('gr-check-spin',false); showResult('gr-check-result','❌ '+e.message,'red'); })
+  .checkGrammarText(text);
+}
+
+// ─────────────── READING ───────────────
+function rdAnalyze(){
+  var text=document.getElementById('rd-text').value.trim(); if(!text) return;
+  spin('rd-spin',true); show('rd-result',false);
+  google.script.run.withSuccessHandler(function(r){ spin('rd-spin',false); showResult('rd-result',r,'blue'); })
+  .withFailureHandler(function(e){ spin('rd-spin',false); showResult('rd-result','❌ '+e.message,'red'); })
+  .analyzeReadingText(text,'full');
+}
+
+// ─────────────── WRITING ───────────────
+function wrImprove(){
+  var text=document.getElementById('wr-text').value.trim(), goal=document.getElementById('wr-goal').value; if(!text) return;
+  spin('wr-spin',true); show('wr-result',false);
+  google.script.run.withSuccessHandler(function(r){ spin('wr-spin',false); showResult('wr-result',r,'green'); })
+  .withFailureHandler(function(e){ spin('wr-spin',false); showResult('wr-result','❌ '+e.message,'red'); })
+  .improveWritingText(text,goal);
+}
+
+// ─────────────── PRONUNCIATION (full mic) ───────────────
+function prPick(){
+  var sel=document.getElementById('pr-sel'), opt=sel.options[sel.selectedIndex];
+  if(!sel.value) return;
+  document.getElementById('pr-custom').value='';
+  prSet(sel.value, opt.dataset.ipa||'');
+}
+function prSet(txt,ipa){
+  prTarget=txt.trim();
+  document.getElementById('pr-tbox').style.display=prTarget?'block':'none';
+  document.getElementById('pr-tword').textContent=prTarget;
+  document.getElementById('pr-tipa').textContent=ipa||'';
+  document.getElementById('pr-guide-btn').disabled=!prTarget;
+  document.getElementById('pr-mic').disabled=!prTarget;
+  show('pr-guide',false); show('pr-heard',false); show('pr-result',false);
+  document.getElementById('pr-status').textContent=prTarget?'Nhấn 🎙️ rồi đọc to':'Chọn/nhập từ trước';
+  if(prTarget) document.getElementById('pr-mic-area').style.display='block';
+}
+function prGenerate(){
+  if(!ALL_VOCAB.length){ alert('Chưa có từ vựng!'); return; }
+  var picked=[...ALL_VOCAB].sort(()=>Math.random()-.5).slice(0,3).map(w=>w.word);
+  spin('pr-gen-spin',true);
+  document.getElementById('pr-gen').disabled=true;
+  google.script.run.withSuccessHandler(function(r){ spin('pr-gen-spin',false); document.getElementById('pr-gen').disabled=false; prSet(r.sentence,''); document.getElementById('pr-custom').value=r.sentence; })
+  .withFailureHandler(function(e){ spin('pr-gen-spin',false); document.getElementById('pr-gen').disabled=false; alert('Lỗi: '+e.message); })
+  .generatePronunciationTarget(picked);
+}
+function prGetGuide(){
+  if(!prTarget) return;
+  document.getElementById('pr-guide-btn').disabled=true; spin('pr-guide-spin',true); show('pr-guide',false);
+  google.script.run.withSuccessHandler(function(g){ spin('pr-guide-spin',false); document.getElementById('pr-guide-btn').disabled=false; showResult('pr-guide',g,'blue'); })
+  .withFailureHandler(function(e){ spin('pr-guide-spin',false); document.getElementById('pr-guide-btn').disabled=false; alert('Lỗi: '+e.message); })
+  .getPronunciationGuide(prTarget);
+}
+function prToggleMic(){ prIsRec?prStopMic():prStartMic(); }
+function prStartMic(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ alert('Cần dùng Chrome!'); return; }
+  prRec=new SR(); prRec.lang='en-US'; prRec.interimResults=false; prRec.maxAlternatives=3;
+  prRec.onstart=function(){ prIsRec=true; document.getElementById('pr-mic').classList.add('rec'); document.getElementById('pr-mic').textContent='⏹️'; document.getElementById('pr-status').textContent='🔴 Đang nghe...'; show('pr-heard',false); show('pr-result',false); };
+  prRec.onresult=function(e){
+    var heard=e.results[0][0].transcript.trim();
+    prStopMic();
+    document.getElementById('pr-heard').innerText='🎧 Nghe được: '+heard; show('pr-heard',true);
+    var norm=function(s){ return s.toLowerCase().replace(/[^a-z0-9 ]/g,'').trim(); };
+    var score=similarity(norm(prTarget),norm(heard));
+    document.getElementById('pr-status').textContent='⏳ Đang phân tích...'; spin('pr-spin',true);
+    google.script.run.withSuccessHandler(function(fb){ spin('pr-spin',false); showResult('pr-result',fb,'green'); document.getElementById('pr-status').textContent=score>=.9?'🌟 Xuất sắc!':score>=.7?'👍 Khá tốt!':'💪 Cần luyện thêm'; })
+    .withFailureHandler(function(e){ spin('pr-spin',false); document.getElementById('pr-status').textContent='Lỗi: '+e.message; })
+    .analyzePronunciation(prTarget,heard,Math.round(score*100));
+  };
+  prRec.onerror=function(e){
+    prStopMic();
+    if(e.error==='not-allowed'){
+      document.getElementById('pr-status').innerHTML='❌ Chưa cấp quyền mic. <a href="chrome://settings/content/microphone" target="_blank" style="color:#1a73e8">Mở Chrome Settings</a> → tìm <b>script.googleusercontent.com</b> → Allow → reload trang.';
+    } else {
+      document.getElementById('pr-status').textContent='❌ Mic lỗi: '+e.error;
+    }
+  };
+  prRec.onend=function(){ prIsRec=false; };
+  prRec.start();
+}
+function prStopMic(){ if(prRec) prRec.stop(); prIsRec=false; document.getElementById('pr-mic').classList.remove('rec'); document.getElementById('pr-mic').textContent='🎙️'; }
+function similarity(a,b){ if(a===b) return 1; if(!a||!b) return 0; var m=a.length,n=b.length,dp=[]; for(var i=0;i<=m;i++){dp[i]=[];for(var j=0;j<=n;j++) dp[i][j]=i===0?j:j===0?i:0;} for(var i=1;i<=m;i++) for(var j=1;j<=n;j++) dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]); return 1-dp[m][n]/Math.max(m,n); }
+
+// ─────────────── SHADOWING ───────────────
+function shGenerate(){
+  var topic=document.getElementById('sh-topic').value, style=document.getElementById('sh-style').value;
+  spin('sh-spin',true); show('sh-main',false);
+  google.script.run.withSuccessHandler(function(data){
+    spin('sh-spin',false);
+    if(!data||!data.text){ alert('AI trả về rỗng. Thử lại!'); return; }
+    shData=data;
+    var stressSet=data.stressWords||[];
+    var chunked=data.text.split(' ').map(function(w){ var p=w.replace(/[^a-zA-Z]/g,''); return '<span class="'+(stressSet.indexOf(p)>=0?'stress':'')+'">'+w+'</span>'; }).join(' ');
+    document.getElementById('sh-chunks').innerHTML=chunked;
+    document.getElementById('sh-chunks3').innerHTML=chunked;
+    document.getElementById('sh-vi').textContent=data.vi||'';
+    document.getElementById('sh-guide').textContent=data.guide||'';
+    shStep(1); show('sh-main',true);
+    show('sh-eval',false); show('sh-heard',false);
+    document.getElementById('sh-status').textContent='Nhấn mic rồi đọc theo đoạn trên';
+  }).withFailureHandler(function(e){ spin('sh-spin',false); alert('❌ '+e.message); })
+  .generateShadowingText(topic,style);
+}
+function shStep(n){
+  [1,2,3].forEach(function(i){ show('sh-step'+i,i===n); document.getElementById('sh-s'+i).className='step'+(i<n?' done':i===n?' active':''); });
+}
+function shToggleMic(){ shIsRec?shStopMic():shStartMic(); }
+function shStartMic(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ alert('Cần dùng Chrome!'); return; }
+  shRec=new SR(); shRec.lang='en-US'; shRec.interimResults=false;
+  shRec.onstart=function(){ shIsRec=true; document.getElementById('sh-mic').classList.add('rec'); document.getElementById('sh-mic').textContent='⏹️'; document.getElementById('sh-status').textContent='🔴 Đang nghe...'; show('sh-heard',false); show('sh-eval',false); };
+  shRec.onresult=function(e){
+    var heard=e.results[0][0].transcript.trim(); shStopMic();
+    document.getElementById('sh-heard').innerText='🎧 Nghe được: '+heard; show('sh-heard',true);
+    document.getElementById('sh-status').textContent='⏳ Đang đánh giá...'; spin('sh-eval-spin',true);
+    google.script.run.withSuccessHandler(function(fb){ spin('sh-eval-spin',false); showResult('sh-eval',fb,'green'); document.getElementById('sh-status').textContent='Xem kết quả ↓'; })
+    .withFailureHandler(function(e){ spin('sh-eval-spin',false); document.getElementById('sh-status').textContent='Lỗi: '+e.message; })
+    .evaluateShadowing(shData.text, heard);
+  };
+  shRec.onerror=function(e){
+    shStopMic();
+    if(e.error==='not-allowed'){
+      document.getElementById('sh-status').innerHTML='❌ Chưa cấp quyền mic. <a href="chrome://settings/content/microphone" target="_blank" style="color:#1a73e8">Mở Chrome Settings</a> → tìm <b>script.googleusercontent.com</b> → Allow → reload trang.';
+    } else {
+      document.getElementById('sh-status').textContent='❌ Mic lỗi: '+e.error;
+    }
+  };
+  shRec.onend=function(){ shIsRec=false; };
+  shRec.start();
+}
+function shStopMic(){ if(shRec) shRec.stop(); shIsRec=false; document.getElementById('sh-mic').classList.remove('rec'); document.getElementById('sh-mic').textContent='🎙️'; }
+
+// ─────────────── ROLE PLAY ───────────────
+function rpStart(){
+  var scene=document.getElementById('rp-scene').value, role=document.getElementById('rp-role').value;
+  rpHistory=[]; spin('rp-spin',true); show('rp-chat',false);
+  google.script.run.withSuccessHandler(function(msg){
+    spin('rp-spin',false); show('rp-chat',true);
+    rpHistory=[{role:'assistant',content:msg}];
+    rpRenderChat();
+  }).withFailureHandler(function(e){ spin('rp-spin',false); alert('Lỗi: '+e.message); })
+  .startRolePlay(scene,role);
+}
+function rpReply(){
+  var txt=document.getElementById('rp-input').value.trim(); if(!txt) return;
+  rpHistory.push({role:'user',content:txt}); document.getElementById('rp-input').value='';
+  rpRenderChat(); spin('rp-reply-spin',true);
+  google.script.run.withSuccessHandler(function(reply){ spin('rp-reply-spin',false); rpHistory.push({role:'assistant',content:reply}); rpRenderChat(); })
+  .withFailureHandler(function(e){ spin('rp-reply-spin',false); alert('Lỗi: '+e.message); })
+  .continueRolePlay(rpHistory);
+}
+function rpRenderChat(){
+  var msgs=document.getElementById('rp-msgs');
+  msgs.innerHTML=rpHistory.map(function(m){ return '<div style="margin-bottom:8px;'+(m.role==='user'?'text-align:right':'')+'"><div style="display:inline-block;padding:8px 12px;border-radius:12px;max-width:85%;font-size:13px;line-height:1.6;'+(m.role==='user'?'background:#1a73e8;color:white':'background:#f0f0f0;color:#333')+'">'+(m.role==='assistant'?'🤖 ':'')+m.content.replace(/\n/g,'<br>')+'</div></div>'; }).join('');
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+// ─────────────── NATURAL SPEAKING ───────────────
+function nsConvert(){
+  var text=document.getElementById('ns-text').value.trim(); if(!text) return;
+  spin('ns-spin',true); show('ns-result',false);
+  google.script.run.withSuccessHandler(function(r){ spin('ns-spin',false); showResult('ns-result',r,'green'); })
+  .withFailureHandler(function(e){ spin('ns-spin',false); showResult('ns-result','❌ '+e.message,'red'); })
+  .translateNatural(text);
+}
+
+// ─────────────── IELTS WRITING ───────────────
+function iwCheck(){
+  var text=document.getElementById('iw-text').value.trim(), task=document.getElementById('iw-task').value, prompt=document.getElementById('iw-prompt').value.trim();
+  if(!text) return;
+  spin('iw-spin',true); show('iw-result',false);
+  google.script.run.withSuccessHandler(function(r){ spin('iw-spin',false); showResult('iw-result',r,'blue'); })
+  .withFailureHandler(function(e){ spin('iw-spin',false); showResult('iw-result','❌ '+e.message,'red'); })
+  .checkIeltsWritingSPA(text,task,prompt);
+}
+
+// ─────────────── IELTS SPEAKING ───────────────
+function isGetQ(){
+  var part=document.getElementById('is-part').value, topic=document.getElementById('is-topic').value;
+  spin('is-spin',true); show('is-area',false);
+  google.script.run.withSuccessHandler(function(q){ spin('is-spin',false); document.getElementById('is-q').textContent=q; document.getElementById('is-ans').value=''; show('is-result',false); show('is-area',true); })
+  .withFailureHandler(function(e){ spin('is-spin',false); alert('Lỗi: '+e.message); })
+  .getIeltsSpeakingQuestion(part,topic);
+}
+function isEval(){
+  var ans=document.getElementById('is-ans').value.trim(), q=document.getElementById('is-q').textContent;
+  if(!ans) return;
+  spin('is-eval-spin',true); show('is-result',false);
+  google.script.run.withSuccessHandler(function(r){ spin('is-eval-spin',false); showResult('is-result',r,'green'); })
+  .withFailureHandler(function(e){ spin('is-eval-spin',false); showResult('is-result','❌ '+e.message,'red'); })
+  .evaluateIeltsSpeaking(q,ans);
+}
+
+// ─────────────── IELTS READING ───────────────
+function irGenerate(){
+  var topic=document.getElementById('ir-topic').value.trim()||'technology';
+  spin('ir-spin',true); show('ir-area',false);
+  google.script.run.withSuccessHandler(function(d){
+    spin('ir-spin',false); irData=d;
+    var html='<div class="card" style="border-left:4px solid #1a73e8"><b>📄 Đoạn văn:</b><p style="font-size:13px;line-height:1.8;margin-top:8px">'+d.passage+'</p></div>'+
+    '<div class="card"><b>❓ Câu hỏi True/False/Not Given:</b>'+
+    d.statements.map(function(s,i){ return '<div style="margin:10px 0"><div style="font-size:13px;margin-bottom:6px">'+(i+1)+'. '+s+'</div><div style="display:flex;gap:6px">'+['True','False','Not Given'].map(function(opt){ return '<button class="btn btn-gray" id="irb'+i+'_'+opt.replace(' ','_')+'" onclick="irSelect('+i+',\''+opt.replace(/'/g,"\\'")+'\',this)" style="font-size:12px;padding:6px 12px">'+opt+'</button>'; }).join('')+'</div><div id="ir-fb'+i+'" style="display:none;font-size:12px;margin-top:4px"></div></div>'; }).join('')+
+    '<button class="btn btn-green" style="margin-top:10px" onclick="irCheckAll()">✅ Kiểm tra tất cả</button></div>';
+    document.getElementById('ir-area').innerHTML=html; show('ir-area',true);
+  }).withFailureHandler(function(e){ spin('ir-spin',false); alert('Lỗi: '+e.message); })
+  .generateIeltsReadingSPA(topic);
+}
+function irSelect(i,val,btn){ document.querySelectorAll('[id^="irb'+i+'_"]').forEach(function(b){ b.classList.remove('btn-primary'); b.classList.add('btn-gray'); }); btn.classList.add('btn-primary'); btn.classList.remove('btn-gray'); }
+function irCheckAll(){
+  if(!irData) return;
+  irData.answers.forEach(function(ans,i){
+    var sel=null; ['True','False','Not_Given'].forEach(function(opt){ var b=document.getElementById('irb'+i+'_'+opt); if(b&&b.classList.contains('btn-primary')) sel=opt.replace('_',' '); });
+    var normSel=sel?(sel.toUpperCase().replace('NOT GIVEN','NOT GIVEN')):'';
+    var normAns=(ans||'').toUpperCase();
+    if(!sel) return;
+    var ok=normSel===normAns;
+    var fb=document.getElementById('ir-fb'+i);
+    fb.style.display='block'; fb.style.color=ok?'#1b5e20':'#b71c1c';
+    fb.textContent=ok?'✅ Đúng!':'❌ Đáp án: '+ans+(irData.explanations&&irData.explanations[i]?' — '+irData.explanations[i]:'');
+  });
+}
+
+// ─────────────── IELTS VOCAB ───────────────
+var ivWords=[];
+function ivGenerate(){
+  var topic=document.getElementById('iv-topic').value;
+  spin('iv-spin',true); show('iv-preview',false);
+  google.script.run.withSuccessHandler(function(words){
+    spin('iv-spin',false); ivWords=words;
+    document.getElementById('iv-count').textContent=words.length+' từ cho chủ đề này:';
+    document.getElementById('iv-list').innerHTML=words.map(function(w){ return '<div class="word-card"><div><b style="color:#1a73e8">'+w.word+'</b> <span style="color:#888;font-size:11px;font-style:italic">'+w.pos+'</span>'+(w.ipa?' · <span style="font-size:12px">'+w.ipa+'</span>':'')+'<div style="font-size:13px;margin:2px 0">📌 '+w.meaning+'</div>'+(w.example?'<div style="font-size:11px;color:#666;font-style:italic">'+w.example+'</div>':'')+'</div></div>'; }).join('');
+    show('iv-preview',true); show('iv-result',false);
+  }).withFailureHandler(function(e){ spin('iv-spin',false); alert('Lỗi: '+e.message); })
+  .generateIeltsVocabSPA(topic);
+}
+function ivSaveAll(){
+  if(!ivWords.length) return;
+  var words=ivWords.map(function(w){ return Object.assign({},w,{tags:'IELTS'}); });
+  google.script.run.withSuccessHandler(function(r){
+    var msg='✅ Đã thêm '+r.added+' từ!';
+    if(r.skipped&&r.skipped.length) msg+='\n⚠️ Bỏ qua '+r.skipped.length+' từ trùng: '+r.skipped.join(', ');
+    showResult('iv-result',msg,'green');
+  }).withFailureHandler(function(e){ showResult('iv-result','❌ '+e.message,'red'); })
+  .bulkAddVocab(words);
+}
+
+// ─────────────── SETTINGS ───────────────
+function stSave(){
+  var key=document.getElementById('st-key').value.trim(); if(!key) return;
+  google.script.run.withSuccessHandler(function(){ showResult('st-result','✅ API Key đã được lưu!','green'); document.getElementById('st-key').value=''; })
+  .withFailureHandler(function(e){ showResult('st-result','❌ '+e.message,'red'); })
+  .saveApiKey(key);
+}
+function stInit(){
+  google.script.run.withSuccessHandler(function(){ showResult('st-init-result','✅ Sheets đã được khởi tạo!','green'); })
+  .withFailureHandler(function(e){ showResult('st-init-result','❌ '+e.message,'red'); })
+  .initSheets();
+}
+
+// ── Init: load vocab from GAS, then render dashboard ──
+function loadVocabFromGAS(){
+  document.getElementById('dash-spin').style.display='';
+  fetch(GAS_URL+'?action=vocab')
+    .then(function(r){ return r.json(); })
+    .then(function(r){
+      if(r.success && r.data){ ALL_VOCAB = r.data; }
+      dashLoad();
+    })
+    .catch(function(){ dashLoad(); }); // graceful fallback
+}
+loadVocabFromGAS();
+</script>
+</body>
+</html>
