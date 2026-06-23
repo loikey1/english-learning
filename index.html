@@ -187,8 +187,11 @@ textarea{resize:vertical}
 <div class="view" id="v-vocab-list">
   <div class="page-title">📋 Danh sách từ vựng</div>
   <div class="card">
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
-      <input id="vl-search" type="text" placeholder="🔍 Tìm từ, nghĩa, IPA..." oninput="vlFilter()" style="flex:1">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+      <input id="vl-search" type="text" placeholder="🔍 Tìm từ, nghĩa, IPA..." oninput="vlFilter()" style="flex:1;min-width:140px">
+      <select id="vl-tag" onchange="vlFilter()" style="width:auto;min-width:140px;flex-shrink:0">
+        <option value="">🏷️ Tất cả tag</option>
+      </select>
       <span id="vl-count" style="font-size:12px;color:#888;white-space:nowrap"></span>
     </div>
     <div id="vl-table" style="overflow-x:auto">
@@ -199,6 +202,7 @@ textarea{resize:vertical}
             <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #e0e0e0">Loại từ</th>
             <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #e0e0e0">IPA</th>
             <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #e0e0e0">Nghĩa</th>
+            <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #e0e0e0">Tags</th>
             <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #e0e0e0">Ví dụ</th>
           </tr>
         </thead>
@@ -213,6 +217,12 @@ textarea{resize:vertical}
 <div class="view" id="v-flashcard">
   <div class="page-title">🃏 Flashcard</div>
   <div class="card">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+      <select id="fc-tag" onchange="fcInit()" style="flex:1">
+        <option value="">🏷️ Tất cả từ vựng</option>
+      </select>
+      <span id="fc-tag-count" style="font-size:12px;color:#888;white-space:nowrap"></span>
+    </div>
     <div onclick="fcToggle()" id="fc-main" class="fc-main"></div>
     <div id="fc-reveal" class="fc-reveal"></div>
     <div style="text-align:center;font-size:11px;color:#aaa;margin:6px 0 10px" id="fc-hint">👆 Nhấn card để xem nghĩa</div>
@@ -228,6 +238,13 @@ textarea{resize:vertical}
 <!-- ── QUIZ MCQ ── -->
 <div class="view" id="v-quiz-mcq">
   <div class="page-title">🧠 Quiz Trắc nghiệm</div>
+  <div class="card" style="padding:12px 20px;margin-bottom:8px">
+    <div style="display:flex;gap:8px;align-items:center">
+      <select id="mcq-tag" onchange="mcqStart()" style="flex:1">
+        <option value="">🏷️ Ôn tất cả từ vựng</option>
+      </select>
+    </div>
+  </div>
   <div class="card" id="mcq-screen">
     <div class="pbar-wrap"><div class="pbar" id="mcq-pbar" style="width:0%"></div></div>
     <div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:10px">
@@ -614,6 +631,34 @@ function dashLoad(){
 }
 function stat(icon,label,val){ return '<div style="background:#f8f9fa;border-radius:12px;padding:14px;text-align:center"><div style="font-size:24px">'+icon+'</div><div style="font-size:22px;font-weight:bold;color:#1a73e8">'+val+'</div><div style="font-size:12px;color:#888">'+label+'</div></div>'; }
 
+// ─────────────── TAG HELPERS ───────────────
+function hasTag(w, tag) {
+  if (!tag) return true;
+  return (w.tags||'').split(',').map(function(t){ return t.trim().toLowerCase(); }).indexOf(tag.toLowerCase()) >= 0;
+}
+function getUniqueTags() {
+  var set = {};
+  ALL_VOCAB.forEach(function(w) {
+    if (w.tags) w.tags.split(',').forEach(function(t) {
+      var tt = t.trim();
+      if (tt) set[tt] = 1;
+    });
+  });
+  return Object.keys(set).sort();
+}
+function refreshTagSelects() {
+  var tags = getUniqueTags();
+  var baseOpt = '<option value="">🏷️ Tất cả</option>';
+  var tagOpts = tags.map(function(t){ return '<option value="'+escHtml(t)+'">'+escHtml(t)+'</option>'; }).join('');
+  ['vl-tag','fc-tag','mcq-tag'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (!el) return;
+    var cur = el.value;
+    el.innerHTML = baseOpt + tagOpts;
+    if (cur && tags.indexOf(cur) >= 0) el.value = cur;
+  });
+}
+
 // ─────────────── VOCAB ADD ───────────────
 function vaLookup(){
   var w=document.getElementById('va-word').value.trim();
@@ -625,6 +670,7 @@ function vaLookup(){
     document.getElementById('va-pos').value=d.pos||'noun';
     document.getElementById('va-ipa').value=d.ipa||'';
     document.getElementById('va-ex').value=d.example||'';
+    document.getElementById('va-tags').value=d.tags||''; // AI auto-fill tags
     show('va-form',true);
   }).withFailureHandler(function(e){ spin('va-spin',false); alert('Lỗi: '+e.message); })
   .getWordInfo(w);
@@ -636,7 +682,8 @@ function vaSave(){
     showResult('va-result','✅ Đã lưu "'+data.word+'" vào Vocabulary!','green');
     document.getElementById('va-word').value=''; show('va-form',false);
     // update in-memory vocab so flashcard/quiz/dashboard reflect new word immediately
-    ALL_VOCAB.push({word:data.word,meaning:data.meaning,pos:data.pos,example:data.example,ipa:data.ipa||''});
+    ALL_VOCAB.push({word:data.word,meaning:data.meaning,pos:data.pos,example:data.example,ipa:data.ipa||'',tags:data.tags||''});
+    refreshTagSelects();
   })
   .withFailureHandler(function(e){ showResult('va-result','❌ '+e.message,'red'); })
   .saveVocab(data);
@@ -671,7 +718,8 @@ function viLookup(){
 function viRender(tags){
   document.getElementById('vi-count').textContent=viResults.length+' từ đã tra:';
   document.getElementById('vi-cards').innerHTML=viResults.map(function(w,i){
-    return '<div class="word-card'+(w.error?' error':'')+'"><input type="checkbox" id="vic'+i+'" '+(w.error?'':'checked')+'><div style="margin-left:8px"><b style="color:#1a73e8">'+w.word+'</b> <span style="color:#888;font-style:italic;font-size:12px">'+( w.pos||'')+'</span>'+(w.ipa?' · <span style="font-size:12px;color:#555">'+w.ipa+'</span>':'')+'<div style="font-size:13px;margin:2px 0">'+(w.error?'⚠️ '+w.error:'📌 '+w.meaning)+'</div>'+(w.example?'<div style="font-size:11px;color:#666;font-style:italic">'+w.example+'</div>':'')+(tags?'<span class="badge">'+tags+'</span>':'')+'</div></div>';
+    var displayTags=tags||(w.tags||'');
+    return '<div class="word-card'+(w.error?' error':'')+'"><input type="checkbox" id="vic'+i+'" '+(w.error?'':'checked')+'><div style="margin-left:8px"><b style="color:#1a73e8">'+w.word+'</b> <span style="color:#888;font-style:italic;font-size:12px">'+( w.pos||'')+'</span>'+(w.ipa?' · <span style="font-size:12px;color:#555">'+w.ipa+'</span>':'')+'<div style="font-size:13px;margin:2px 0">'+(w.error?'⚠️ '+w.error:'📌 '+w.meaning)+'</div>'+(w.example?'<div style="font-size:11px;color:#666;font-style:italic">'+w.example+'</div>':'')+(displayTags?'<span class="badge">'+displayTags+'</span>':'')+'</div></div>';
   }).join('');
   show('vi-preview',true);
 }
@@ -685,7 +733,8 @@ function viSave(){
     if(r.skipped&&r.skipped.length) msg+='\n⚠️ Bỏ qua '+r.skipped.length+' từ đã có: '+r.skipped.join(', ');
     showResult('vi-result',msg,'green'); show('vi-preview',false);
     // update in-memory vocab
-    sel.forEach(function(w){ if(!r.skipped||r.skipped.indexOf(w.word)<0) ALL_VOCAB.push({word:w.word,meaning:w.meaning,pos:w.pos||'',example:w.example||'',ipa:w.ipa||''}); });
+    sel.forEach(function(w){ if(!r.skipped||r.skipped.indexOf(w.word)<0) ALL_VOCAB.push({word:w.word,meaning:w.meaning,pos:w.pos||'',example:w.example||'',ipa:w.ipa||'',tags:w.tags||''}); });
+    refreshTagSelects();
   }).withFailureHandler(function(e){ showResult('vi-result','❌ '+e.message,'red'); })
   .bulkAddVocab(sel);
 }
@@ -693,7 +742,12 @@ function viSave(){
 // ─────────────── FLASHCARD ───────────────
 var fcWords=[], fcIdx=0;
 function fcInit(){
-  fcWords=[...ALL_VOCAB]; fcIdx=0; fcShuffle(); fcRender();
+  refreshTagSelects();
+  var tag=(document.getElementById('fc-tag')||{}).value||'';
+  fcWords=tag?ALL_VOCAB.filter(function(w){return hasTag(w,tag);}):ALL_VOCAB.slice();
+  fcIdx=0; fcShuffle();
+  var ctr=document.getElementById('fc-tag-count');
+  if(ctr) ctr.textContent=fcWords.length+' từ';
 }
 function fcShuffle(){ for(var i=fcWords.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=fcWords[i]; fcWords[i]=fcWords[j]; fcWords[j]=t; } fcIdx=0; fcRender(); }
 function fcGo(d){ fcIdx=(fcIdx+d+fcWords.length)%fcWords.length; fcRender(); }
@@ -726,13 +780,16 @@ function fcRender(){
 // ─────────────── VOCAB LIST ───────────────
 function vlRender(){
   document.getElementById('vl-search').value='';
+  refreshTagSelects();
   vlFilter();
 }
 function vlFilter(){
   var q=(document.getElementById('vl-search').value||'').toLowerCase().trim();
-  var words=q?ALL_VOCAB.filter(function(w){
-    return (w.word||'').toLowerCase().includes(q)||(w.meaning||'').toLowerCase().includes(q)||(w.ipa||'').toLowerCase().includes(q);
-  }):ALL_VOCAB;
+  var tag=(document.getElementById('vl-tag')||{}).value||'';
+  var words=ALL_VOCAB.filter(function(w){
+    var mQ=!q||(w.word||'').toLowerCase().includes(q)||(w.meaning||'').toLowerCase().includes(q)||(w.ipa||'').toLowerCase().includes(q);
+    return mQ&&hasTag(w,tag);
+  });
   document.getElementById('vl-count').textContent=words.length+' từ';
   if(!words.length){
     document.getElementById('vl-body').innerHTML='';
@@ -742,11 +799,15 @@ function vlFilter(){
   document.getElementById('vl-empty').style.display='none';
   document.getElementById('vl-body').innerHTML=words.map(function(w,i){
     var bg=i%2===0?'#fff':'#f8f9fa';
+    var tagsHtml=(w.tags||'').split(',').filter(function(t){return t.trim();}).map(function(t){
+      return '<span class="badge" style="font-size:10px;padding:1px 6px;margin:1px 2px 1px 0;display:inline-block">'+escHtml(t.trim())+'</span>';
+    }).join('');
     return '<tr style="background:'+bg+';border-bottom:1px solid #f0f0f0">'+
       '<td style="padding:9px 10px;font-weight:bold;color:#1a73e8;white-space:nowrap">'+escHtml(w.word||'')+'</td>'+
       '<td style="padding:9px 10px;color:#888;font-size:11px;white-space:nowrap">'+escHtml(w.pos||'')+'</td>'+
       '<td style="padding:9px 10px;color:#555;font-size:12px;white-space:nowrap">'+escHtml(w.ipa||'')+'</td>'+
       '<td style="padding:9px 10px;color:#333">'+escHtml(w.meaning||'')+'</td>'+
+      '<td style="padding:9px 10px">'+tagsHtml+'</td>'+
       '<td style="padding:9px 10px;color:#666;font-style:italic;font-size:12px">'+escHtml(w.example||'')+'</td>'+
     '</tr>';
   }).join('');
@@ -756,15 +817,18 @@ function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace
 // ─────────────── MCQ QUIZ ───────────────
 var mcqQs=[], mcqIdx=0, mcqSc=0, mcqWr=0, MCQ_TOTAL=10;
 function mcqStart(){
-  if(ALL_VOCAB.length<4){ document.getElementById('mcq-screen').innerHTML='<div style="color:#888;text-align:center;padding:20px">Cần ít nhất 4 từ để chơi quiz!</div>'; return; }
-  var pool=[...ALL_VOCAB].sort(()=>Math.random()-.5).slice(0,Math.min(MCQ_TOTAL,ALL_VOCAB.length));
-  mcqQs=pool.map(function(w){
-    var others=ALL_VOCAB.filter(x=>x.word!==w.word).sort(()=>Math.random()-.5).slice(0,3);
+  refreshTagSelects();
+  var tag=(document.getElementById('mcq-tag')||{}).value||'';
+  var pool=tag?ALL_VOCAB.filter(function(w){return hasTag(w,tag);}):ALL_VOCAB;
+  if(pool.length<4){ document.getElementById('mcq-screen').innerHTML='<div style="color:#888;text-align:center;padding:20px">Cần ít nhất 4 từ để chơi quiz!'+(tag?' (nhóm "<b>'+escHtml(tag)+'</b>")':'')+'</div>'; return; }
+  var sorted=[...pool].sort(function(){return Math.random()-.5;}).slice(0,Math.min(MCQ_TOTAL,pool.length));
+  mcqQs=sorted.map(function(w){
+    var others=ALL_VOCAB.filter(function(x){return x.word!==w.word;}).sort(function(){return Math.random()-.5;}).slice(0,3);
     var canFill=w.example&&w.example.length>5;
     var type=canFill&&Math.random()>.45?'fill':'meaning';
-    if(type==='meaning') return {type,word:w.word,ipa:w.ipa,pos:w.pos,answer:w.meaning,opts:shuffle4([w.meaning,...others.map(x=>x.meaning)])};
+    if(type==='meaning') return {type:type,word:w.word,ipa:w.ipa,pos:w.pos,answer:w.meaning,opts:shuffle4([w.meaning,...others.map(function(x){return x.meaning;})])};
     var sent=w.example.replace(new RegExp(w.word,'gi'),'___');
-    return {type,sentence:sent,answer:w.word,meaning:w.meaning,opts:shuffle4([w.word,...others.map(x=>x.word)])};
+    return {type:type,sentence:sent,answer:w.word,meaning:w.meaning,opts:shuffle4([w.word,...others.map(function(x){return x.word;})])};
   });
   mcqIdx=0; mcqSc=0; mcqWr=0;
   document.getElementById('mcq-result').style.display='none';
@@ -1187,6 +1251,7 @@ function loadVocabFromGAS(){
   callGAS('getVocab')
     .then(function(vocab){
       ALL_VOCAB = vocab || [];
+      refreshTagSelects();
       // populate vocab dropdowns dynamically
       var prSel = document.getElementById('pr-sel');
       if(prSel){
